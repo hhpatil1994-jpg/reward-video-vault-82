@@ -7,10 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Coins, 
   Play, 
-  Gift, 
   TrendingUp, 
   Video,
-  Award,
   Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -226,7 +224,7 @@ const UserDashboard: React.FC = () => {
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalPoints.toLocaleString()}</div>
                 <p className="text-xs text-green-100">
-                  Available for redemption
+                  Points earned
                 </p>
               </CardContent>
             </Card>
@@ -358,76 +356,6 @@ const UserDashboard: React.FC = () => {
           </Card>
         </motion.div>
 
-        {/* Rewards Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8"
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gift className="h-5 w-5" />
-                Redeem Rewards
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Use your points to claim amazing rewards
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="border-2 border-dashed border-gray-300">
-                  <CardContent className="p-4 text-center">
-                    <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <h3 className="font-medium mb-1">$10 Amazon Gift Card</h3>
-                    <p className="text-sm text-muted-foreground mb-3">1,000 points</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={stats.totalPoints < 1000}
-                      className="w-full"
-                    >
-                      {stats.totalPoints >= 1000 ? 'Redeem' : 'Need More Points'}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 border-dashed border-gray-300">
-                  <CardContent className="p-4 text-center">
-                    <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <h3 className="font-medium mb-1">$25 PayPal Cash</h3>
-                    <p className="text-sm text-muted-foreground mb-3">2,500 points</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={stats.totalPoints < 2500}
-                      className="w-full"
-                    >
-                      {stats.totalPoints >= 2500 ? 'Redeem' : 'Need More Points'}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-2 border-dashed border-gray-300">
-                  <CardContent className="p-4 text-center">
-                    <Award className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <h3 className="font-medium mb-1">Premium Subscription</h3>
-                    <p className="text-sm text-muted-foreground mb-3">5,000 points</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      disabled={stats.totalPoints < 5000}
-                      className="w-full"
-                    >
-                      {stats.totalPoints >= 5000 ? 'Redeem' : 'Need More Points'}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
     </div>
   );
