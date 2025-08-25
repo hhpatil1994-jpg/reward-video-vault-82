@@ -61,9 +61,9 @@ const UserDashboard: React.FC = () => {
         {
           id: '1',
           title: 'Summer Sale Advertisement',
-          description: 'Watch this exciting summer sale ad and earn 100 points!',
+          description: 'Watch this exciting summer sale ad and earn 2 points!',
           video_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
-          reward_points: 100,
+          reward_points: 2,
           created_at: new Date().toISOString(),
           questions: [
             {
@@ -83,9 +83,9 @@ const UserDashboard: React.FC = () => {
         {
           id: '2',
           title: 'Tech Product Launch',
-          description: 'Discover the latest tech innovation and earn 150 points!',
+          description: 'Discover the latest tech innovation and earn 2 points!',
           video_url: 'https://www.w3schools.com/html/movie.mp4',
-          reward_points: 150,
+          reward_points: 2,
           created_at: new Date().toISOString(),
           questions: [
             {
