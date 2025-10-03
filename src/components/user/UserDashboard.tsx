@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import VideoPlayer from './VideoPlayer';
@@ -37,6 +38,7 @@ interface UserStats {
 }
 
 const UserDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -198,13 +200,21 @@ const UserDashboard: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">RewardAd Dashboard</h1>
             <p className="text-sm text-muted-foreground">Welcome to the rewards platform</p>
           </div>
-          <Button
-            onClick={() => setShowAddForm(true)}
-            className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Video
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate('/admin')}
+            >
+              Admin Panel
+            </Button>
+            <Button
+              onClick={() => setShowAddForm(true)}
+              className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Video
+            </Button>
+          </div>
         </div>
       </header>
 

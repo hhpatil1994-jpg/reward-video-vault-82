@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, supabase } from '../../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ interface AdminStats {
 }
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [stats, setStats] = useState<AdminStats>({
@@ -316,8 +318,11 @@ const AdminDashboard: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground">Manage advertisements and monitor performance</p>
           </div>
-          <Button variant="outline" onClick={signOut}>
-            Sign Out
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+          >
+            ← Back to User Dashboard
           </Button>
         </div>
       </header>
