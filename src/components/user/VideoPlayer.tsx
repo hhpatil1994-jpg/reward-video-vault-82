@@ -152,6 +152,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
     // Handle different video formats and sources
     const sources = [];
     
+    if (!url) return null;
+    
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       // For YouTube videos, we'd need a different approach (iframe embed)
       // For now, show error message
