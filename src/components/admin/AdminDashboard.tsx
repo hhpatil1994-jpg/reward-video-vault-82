@@ -7,6 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { 
   Upload, 
   Video, 
@@ -51,6 +57,13 @@ const AdminDashboard: React.FC = () => {
     description: '',
     videoUrl: '',
     rewardPoints: 10
+  });
+  const [editingAd, setEditingAd] = useState<Ad | null>(null);
+  const [editData, setEditData] = useState({
+    title: '',
+    description: '',
+    videoUrl: '',
+    rewardPoints: 2
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -149,6 +162,54 @@ const AdminDashboard: React.FC = () => {
       toast({
         title: "Upload failed",
         description: error.message || "Failed to upload advertisement.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleEditAd = (ad: Ad) => {
+    setEditingAd(ad);
+    setEditData({
+      title: ad.title,
+      description: ad.description,
+      videoUrl: ad.video_url,
+      rewardPoints: ad.reward_points
+    });
+  };
+
+  const handleUpdateAd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAd) return;
+    
+    setUploading(true);
+
+    try {
+      const { error } = await supabase
+        .from('ads')
+        .update({
+          title: editData.title,
+          description: editData.description,
+          video_url: editData.videoUrl,
+          reward_points: editData.rewardPoints,
+        })
+        .eq('id', editingAd.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Advertisement updated successfully.",
+      });
+
+      setEditingAd(null);
+      fetchAds();
+      fetchStats();
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update advertisement.",
         variant: "destructive",
       });
     } finally {
@@ -447,6 +508,14 @@ const AdminDashboard: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() => handleEditAd(ad)}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleDeleteAd(ad.id)}
                                 className="text-red-600 hover:text-red-700"
                               >
@@ -464,6 +533,78 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={!!editingAd} onOpenChange={(open) => !open && setEditingAd(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Advertisement</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateAd} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Advertisement Title</Label>
+                <Input
+                  id="edit-title"
+                  value={editData.title}
+                  onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter ad title"
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-points">Reward Points</Label>
+                <Input
+                  id="edit-points"
+                  type="number"
+                  min="1"
+                  value={editData.rewardPoints}
+                  onChange={(e) => setEditData(prev => ({ ...prev, rewardPoints: parseInt(e.target.value) }))}
+                  placeholder="Points to award"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-videoUrl">Video URL</Label>
+              <Input
+                id="edit-videoUrl"
+                type="url"
+                value={editData.videoUrl}
+                onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                placeholder="Enter video URL"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editData.description}
+                onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter ad description (optional)"
+                rows={3}
+              />
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setEditingAd(null)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={uploading}>
+                {uploading ? "Updating..." : "Update Advertisement"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
