@@ -58,6 +58,8 @@ const AdminDashboard: React.FC = () => {
     videoUrl: '',
     rewardPoints: 10
   });
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [editVideoFile, setEditVideoFile] = useState<File | null>(null);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
   const [editData, setEditData] = useState({
     title: '',
@@ -132,12 +134,38 @@ const AdminDashboard: React.FC = () => {
     setUploading(true);
 
     try {
+      let videoUrl = uploadData.videoUrl;
+
+      // If a file is selected, upload it to Supabase storage
+      if (videoFile) {
+        const fileExt = videoFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `ads/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('videos')
+          .upload(filePath, videoFile);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('videos')
+          .getPublicUrl(filePath);
+
+        videoUrl = publicUrl;
+      }
+
+      if (!videoUrl) {
+        throw new Error('Please provide a video URL or upload a video file');
+      }
+
       const { error } = await supabase
         .from('ads')
         .insert({
           title: uploadData.title,
           description: uploadData.description,
-          video_url: uploadData.videoUrl,
+          video_url: videoUrl,
           reward_points: uploadData.rewardPoints,
           created_by: user?.id
         });
@@ -155,6 +183,7 @@ const AdminDashboard: React.FC = () => {
         videoUrl: '',
         rewardPoints: 10
       });
+      setVideoFile(null);
       setShowUploadForm(false);
       fetchAds();
       fetchStats();
@@ -186,12 +215,34 @@ const AdminDashboard: React.FC = () => {
     setUploading(true);
 
     try {
+      let videoUrl = editData.videoUrl;
+
+      // If a new file is selected, upload it
+      if (editVideoFile) {
+        const fileExt = editVideoFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `ads/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('videos')
+          .upload(filePath, editVideoFile);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('videos')
+          .getPublicUrl(filePath);
+
+        videoUrl = publicUrl;
+      }
+
       const { error } = await supabase
         .from('ads')
         .update({
           title: editData.title,
           description: editData.description,
-          video_url: editData.videoUrl,
+          video_url: videoUrl,
           reward_points: editData.rewardPoints,
         })
         .eq('id', editingAd.id);
@@ -204,6 +255,7 @@ const AdminDashboard: React.FC = () => {
       });
 
       setEditingAd(null);
+      setEditVideoFile(null);
       fetchAds();
       fetchStats();
     } catch (error: any) {
@@ -408,10 +460,38 @@ const AdminDashboard: React.FC = () => {
                       value={uploadData.videoUrl}
                       onChange={(e) => setUploadData(prev => ({ ...prev, videoUrl: e.target.value }))}
                       placeholder="Enter video URL (MP4, WebM, MOV supported)"
-                      required
+                      disabled={!!videoFile}
                     />
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">OR</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="videoFile">Upload Video File</Label>
+                    <Input
+                      id="videoFile"
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setVideoFile(file);
+                          setUploadData(prev => ({ ...prev, videoUrl: '' }));
+                        }
+                      }}
+                      disabled={!!uploadData.videoUrl}
+                    />
+                    {videoFile && (
+                      <p className="text-xs text-muted-foreground">
+                        Selected: {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground">
-                      Supported formats: MP4, WebM, MOV, AVI. Make sure the video is publicly accessible.
+                      Supported formats: MP4, WebM, MOV, AVI. Max size: 100MB
                     </p>
                   </div>
                   
@@ -575,8 +655,38 @@ const AdminDashboard: React.FC = () => {
                 value={editData.videoUrl}
                 onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
                 placeholder="Enter video URL"
-                required
+                disabled={!!editVideoFile}
               />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">OR</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-videoFile">Upload New Video File</Label>
+              <Input
+                id="edit-videoFile"
+                type="file"
+                accept="video/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setEditVideoFile(file);
+                  }
+                }}
+                disabled={!!editData.videoUrl && !editVideoFile}
+              />
+              {editVideoFile && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {editVideoFile.name} ({(editVideoFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Leave empty to keep current video. Max size: 100MB
+              </p>
             </div>
             
             <div className="space-y-2">
