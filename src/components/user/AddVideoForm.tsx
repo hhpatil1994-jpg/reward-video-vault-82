@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Trash2, Upload } from 'lucide-react';
+import { supabase } from '../../contexts/AuthContext';
 
 interface Question {
   id: string;
@@ -27,6 +28,8 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
     videoUrl: '',
     rewardPoints: 100
   });
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([
     {
       id: '1',
@@ -109,6 +112,46 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
           }
         : q
     ));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoFile(file);
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('videos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, videoUrl: publicUrl }));
+      
+      toast({
+        title: "Success!",
+        description: "Video uploaded successfully!",
+      });
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload video. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const isVideoUrl = (url: string) => {
@@ -222,14 +265,36 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
           
           <div className="space-y-2">
             <Label htmlFor="videoUrl">Video URL *</Label>
-            <Input
-              id="videoUrl"
-              type="url"
-              value={formData.videoUrl}
-              onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
-              placeholder="https://example.com/video.mp4 or YouTube/Vimeo URL"
-              required
-            />
+            <div className="flex gap-2">
+              <Input
+                id="videoUrl"
+                type="url"
+                value={formData.videoUrl}
+                onChange={(e) => setFormData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                placeholder="https://example.com/video.mp4 or YouTube/Vimeo URL"
+                required
+                className="flex-1"
+              />
+              <div className="relative">
+                <Input
+                  type="file"
+                  accept="video/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="video-file-upload"
+                  disabled={uploading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('video-file-upload')?.click()}
+                  disabled={uploading}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  {uploading ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground">
               Supports: MP4, WebM, OGG, AVI, MOV, YouTube, Vimeo and other video formats
             </p>
