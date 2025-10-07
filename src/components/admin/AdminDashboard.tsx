@@ -74,62 +74,9 @@ const AdminDashboard: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchAds();
-    fetchStats();
+    // Database not configured yet - using local state
+    setLoading(false);
   }, []);
-
-  const fetchAds = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('ads')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setAds(data || []);
-    } catch (error) {
-      console.error('Error fetching ads:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load advertisements.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      // Get total ads
-      const { count: adsCount } = await supabase
-        .from('ads')
-        .select('*', { count: 'exact' });
-
-      // Get total users
-      const { count: usersCount } = await supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact' })
-        .eq('role', 'user');
-
-      // Get total views and points distributed
-      const { data: viewsData } = await supabase
-        .from('ad_views')
-        .select('points_earned');
-
-      const totalViews = viewsData?.length || 0;
-      const totalPointsDistributed = viewsData?.reduce((sum, view) => sum + view.points_earned, 0) || 0;
-
-      setStats({
-        totalAds: adsCount || 0,
-        totalUsers: usersCount || 0,
-        totalViews,
-        totalPointsDistributed
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
 
   const handleUploadAd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,17 +109,18 @@ const AdminDashboard: React.FC = () => {
         throw new Error('Please provide a video URL or upload a video file');
       }
 
-      const { error } = await supabase
-        .from('ads')
-        .insert({
-          title: uploadData.title,
-          description: uploadData.description,
-          video_url: videoUrl,
-          reward_points: uploadData.rewardPoints,
-          created_by: user?.id
-        });
+      // Add to local state (database not configured yet)
+      const newAd: Ad = {
+        id: Date.now().toString(),
+        title: uploadData.title,
+        description: uploadData.description,
+        video_url: videoUrl,
+        reward_points: uploadData.rewardPoints,
+        created_at: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      setAds(prev => [newAd, ...prev]);
+      setStats(prev => ({ ...prev, totalAds: prev.totalAds + 1 }));
 
       toast({
         title: "Success!",
@@ -187,8 +135,6 @@ const AdminDashboard: React.FC = () => {
       });
       setVideoFile(null);
       setShowUploadForm(false);
-      fetchAds();
-      fetchStats();
     } catch (error: any) {
       toast({
         title: "Upload failed",
@@ -239,17 +185,18 @@ const AdminDashboard: React.FC = () => {
         videoUrl = publicUrl;
       }
 
-      const { error } = await supabase
-        .from('ads')
-        .update({
-          title: editData.title,
-          description: editData.description,
-          video_url: videoUrl,
-          reward_points: editData.rewardPoints,
-        })
-        .eq('id', editingAd.id);
-
-      if (error) throw error;
+      // Update local state (database not configured yet)
+      setAds(prev => prev.map(ad => 
+        ad.id === editingAd.id 
+          ? {
+              ...ad,
+              title: editData.title,
+              description: editData.description,
+              video_url: videoUrl,
+              reward_points: editData.rewardPoints,
+            }
+          : ad
+      ));
 
       toast({
         title: "Success!",
@@ -258,8 +205,6 @@ const AdminDashboard: React.FC = () => {
 
       setEditingAd(null);
       setEditVideoFile(null);
-      fetchAds();
-      fetchStats();
     } catch (error: any) {
       toast({
         title: "Update failed",
@@ -274,28 +219,13 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteAd = async (adId: string) => {
     if (!confirm('Are you sure you want to delete this advertisement?')) return;
 
-    try {
-      const { error } = await supabase
-        .from('ads')
-        .delete()
-        .eq('id', adId);
+    setAds(prev => prev.filter(ad => ad.id !== adId));
+    setStats(prev => ({ ...prev, totalAds: Math.max(0, prev.totalAds - 1) }));
 
-      if (error) throw error;
-
-      toast({
-        title: "Deleted",
-        description: "Advertisement deleted successfully.",
-      });
-
-      fetchAds();
-      fetchStats();
-    } catch (error: any) {
-      toast({
-        title: "Delete failed",
-        description: error.message || "Failed to delete advertisement.",
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Deleted",
+      description: "Advertisement deleted successfully.",
+    });
   };
 
   if (loading) {
