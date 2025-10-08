@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, supabase } from '../../contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +45,6 @@ interface AdminStats {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
@@ -74,9 +73,30 @@ const AdminDashboard: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Database not configured yet - using local state
-    setLoading(false);
+    fetchAds();
   }, []);
+
+  const fetchAds = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('advertisements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setAds(data || []);
+      setStats(prev => ({ ...prev, totalAds: data?.length || 0 }));
+    } catch (error: any) {
+      toast({
+        title: "Error loading ads",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUploadAd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,15 +129,19 @@ const AdminDashboard: React.FC = () => {
         throw new Error('Please provide a video URL or upload a video file');
       }
 
-      // Add to local state (database not configured yet)
-      const newAd: Ad = {
-        id: Date.now().toString(),
-        title: uploadData.title,
-        description: uploadData.description,
-        video_url: videoUrl,
-        reward_points: uploadData.rewardPoints,
-        created_at: new Date().toISOString()
-      };
+      // Save to database
+      const { data: newAd, error: insertError } = await supabase
+        .from('advertisements')
+        .insert({
+          title: uploadData.title,
+          description: uploadData.description,
+          video_url: videoUrl,
+          reward_points: uploadData.rewardPoints,
+        })
+        .select()
+        .single();
+
+      if (insertError) throw insertError;
 
       setAds(prev => [newAd, ...prev]);
       setStats(prev => ({ ...prev, totalAds: prev.totalAds + 1 }));
@@ -185,7 +209,19 @@ const AdminDashboard: React.FC = () => {
         videoUrl = publicUrl;
       }
 
-      // Update local state (database not configured yet)
+      // Update in database
+      const { error: updateError } = await supabase
+        .from('advertisements')
+        .update({
+          title: editData.title,
+          description: editData.description,
+          video_url: videoUrl,
+          reward_points: editData.rewardPoints,
+        })
+        .eq('id', editingAd.id);
+
+      if (updateError) throw updateError;
+
       setAds(prev => prev.map(ad => 
         ad.id === editingAd.id 
           ? {
@@ -219,13 +255,28 @@ const AdminDashboard: React.FC = () => {
   const handleDeleteAd = async (adId: string) => {
     if (!confirm('Are you sure you want to delete this advertisement?')) return;
 
-    setAds(prev => prev.filter(ad => ad.id !== adId));
-    setStats(prev => ({ ...prev, totalAds: Math.max(0, prev.totalAds - 1) }));
+    try {
+      const { error } = await supabase
+        .from('advertisements')
+        .delete()
+        .eq('id', adId);
 
-    toast({
-      title: "Deleted",
-      description: "Advertisement deleted successfully.",
-    });
+      if (error) throw error;
+
+      setAds(prev => prev.filter(ad => ad.id !== adId));
+      setStats(prev => ({ ...prev, totalAds: Math.max(0, prev.totalAds - 1) }));
+
+      toast({
+        title: "Deleted",
+        description: "Advertisement deleted successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Delete failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {

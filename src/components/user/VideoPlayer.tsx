@@ -148,20 +148,34 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+  const getYouTubeVideoId = (url: string) => {
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+      /youtube\.com\/embed\/([^&\n?#]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
+  };
+
+  const isYouTubeUrl = (url: string) => {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
   const getVideoSources = (url: string) => {
     // Handle different video formats and sources
     const sources = [];
     
     if (!url) return null;
     
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      // For YouTube videos, we'd need a different approach (iframe embed)
-      // For now, show error message
-      return null;
+    if (isYouTubeUrl(url)) {
+      return 'youtube';
     }
     
     // For direct video files, provide multiple format options
-    const baseUrl = url.split('.').slice(0, -1).join('.');
     const extension = url.split('.').pop()?.toLowerCase();
     
     switch (extension) {
@@ -198,6 +212,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
   }
 
   const videoSources = getVideoSources(ad.video_url);
+  const youtubeVideoId = isYouTubeUrl(ad.video_url) ? getYouTubeVideoId(ad.video_url) : null;
+
+  // Handle YouTube video end
+  useEffect(() => {
+    if (!youtubeVideoId) return;
+
+    const handleYouTubeMessage = (event: MessageEvent) => {
+      if (event.data === 'videoEnded') {
+        handleVideoEnd();
+      }
+    };
+
+    window.addEventListener('message', handleYouTubeMessage);
+    return () => window.removeEventListener('message', handleYouTubeMessage);
+  }, [youtubeVideoId]);
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
@@ -227,7 +256,24 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
                 <p className="text-sm text-gray-400">Please check the video URL or format</p>
               </div>
             </div>
-          ) : videoSources ? (
+          ) : youtubeVideoId ? (
+            <div className="relative w-full aspect-video">
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&rel=0`}
+                title={ad.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              <Button
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
+                onClick={() => handleVideoEnd()}
+              >
+                Mark as Completed
+              </Button>
+            </div>
+          ) : videoSources && Array.isArray(videoSources) ? (
             <>
               <video
                 ref={videoRef}
@@ -276,8 +322,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
           ) : (
             <div className="w-full aspect-video flex items-center justify-center bg-gray-800 text-white">
               <div className="text-center">
-                <p className="mb-2">YouTube videos not supported yet</p>
-                <p className="text-sm text-gray-400">Please use direct video file URLs</p>
+                <p className="mb-2">Unable to load video</p>
+                <p className="text-sm text-gray-400">Please check the video URL or format</p>
               </div>
             </div>
           )}

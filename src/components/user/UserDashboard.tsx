@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import VideoPlayer from './VideoPlayer';
 import AddVideoForm from './AddVideoForm';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Coins, 
   Play, 
@@ -51,67 +52,37 @@ const UserDashboard: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Load saved ads from localStorage
-    const savedAds = localStorage.getItem('userAds');
-    let initialAds: Ad[] = [];
-    
-    if (savedAds) {
-      initialAds = JSON.parse(savedAds);
-    } else {
-      // Default mock ads with questions
-      initialAds = [
-        {
-          id: '1',
-          title: 'Summer Sale Advertisement',
-          description: 'Watch this exciting summer sale ad and earn 2 points!',
-          video_url: 'https://www.w3schools.com/html/mov_bbb.mp4',
-          reward_points: 2,
-          created_at: new Date().toISOString(),
-          questions: [
-            {
-              id: '1',
-              question: 'What season is featured in this advertisement?',
-              options: ['Spring', 'Summer', 'Fall', 'Winter'],
-              correctAnswer: 1
-            },
-            {
-              id: '2',
-              question: 'What type of event is being advertised?',
-              options: ['Sale', 'Contest', 'Launch', 'Review'],
-              correctAnswer: 0
-            }
-          ]
-        },
-        {
-          id: '2',
-          title: 'Tech Product Launch',
-          description: 'Discover the latest tech innovation and earn 2 points!',
-          video_url: 'https://www.w3schools.com/html/movie.mp4',
-          reward_points: 2,
-          created_at: new Date().toISOString(),
-          questions: [
-            {
-              id: '1',
-              question: 'What type of content is this video about?',
-              options: ['Sports', 'Technology', 'Food', 'Travel'],
-              correctAnswer: 1
-            }
-          ]
-        }
-      ];
-    }
-    
-    setTimeout(() => {
-      setAds(initialAds);
-      setLoading(false);
-    }, 1000);
+    fetchAds();
+    loadStats();
+  }, []);
 
-    // Load saved stats
+  const fetchAds = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('advertisements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setAds(data || []);
+    } catch (error: any) {
+      toast({
+        title: "Error loading ads",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadStats = () => {
     const savedStats = localStorage.getItem('userStats');
     if (savedStats) {
       setStats(JSON.parse(savedStats));
     }
-  }, []);
+  };
 
   const handleAdComplete = (earned: boolean) => {
     if (selectedAd && earned) {
@@ -133,10 +104,9 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleVideoAdded = (newVideo: Ad) => {
-    const updatedAds = [...ads, newVideo];
-    setAds(updatedAds);
-    localStorage.setItem('userAds', JSON.stringify(updatedAds));
+    setAds(prev => [newVideo, ...prev]);
     setShowAddForm(false);
+    fetchAds(); // Refresh the list
   };
 
   if (loading) {
