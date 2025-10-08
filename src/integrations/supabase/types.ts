@@ -19,6 +19,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          questions: Json | null
           reward_points: number
           title: string
           updated_at: string
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          questions?: Json | null
           reward_points?: number
           title: string
           updated_at?: string
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          questions?: Json | null
           reward_points?: number
           title?: string
           updated_at?: string

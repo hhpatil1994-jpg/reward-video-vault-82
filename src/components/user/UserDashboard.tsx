@@ -65,7 +65,13 @@ const UserDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      setAds(data || []);
+      // Transform data to match Ad interface
+      const transformedAds = (data || []).map(ad => ({
+        ...ad,
+        questions: (ad.questions as any) || []
+      }));
+
+      setAds(transformedAds);
     } catch (error: any) {
       toast({
         title: "Error loading ads",

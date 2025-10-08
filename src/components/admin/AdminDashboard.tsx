@@ -27,12 +27,20 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface Question {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
 interface Ad {
   id: string;
   title: string;
   description: string;
   video_url: string;
   reward_points: number;
+  questions?: Question[];
   created_at: string;
 }
 
@@ -59,6 +67,8 @@ const AdminDashboard: React.FC = () => {
     videoUrl: '',
     rewardPoints: 10
   });
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [editQuestions, setEditQuestions] = useState<Question[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [editVideoFile, setEditVideoFile] = useState<File | null>(null);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
@@ -85,8 +95,14 @@ const AdminDashboard: React.FC = () => {
 
       if (error) throw error;
 
-      setAds(data || []);
-      setStats(prev => ({ ...prev, totalAds: data?.length || 0 }));
+      // Transform data to match Ad interface
+      const transformedAds = (data || []).map(ad => ({
+        ...ad,
+        questions: (ad.questions as any) || []
+      }));
+
+      setAds(transformedAds);
+      setStats(prev => ({ ...prev, totalAds: transformedAds.length }));
     } catch (error: any) {
       toast({
         title: "Error loading ads",
@@ -137,13 +153,19 @@ const AdminDashboard: React.FC = () => {
           description: uploadData.description,
           video_url: videoUrl,
           reward_points: uploadData.rewardPoints,
+          questions: questions.length > 0 ? (questions as any) : []
         })
         .select()
         .single();
 
       if (insertError) throw insertError;
 
-      setAds(prev => [newAd, ...prev]);
+      const transformedAd = {
+        ...newAd,
+        questions: (newAd.questions as any) || []
+      };
+
+      setAds(prev => [transformedAd, ...prev]);
       setStats(prev => ({ ...prev, totalAds: prev.totalAds + 1 }));
 
       toast({
@@ -158,6 +180,7 @@ const AdminDashboard: React.FC = () => {
         rewardPoints: 10
       });
       setVideoFile(null);
+      setQuestions([]);
       setShowUploadForm(false);
     } catch (error: any) {
       toast({
@@ -178,6 +201,7 @@ const AdminDashboard: React.FC = () => {
       videoUrl: ad.video_url,
       rewardPoints: ad.reward_points
     });
+    setEditQuestions(ad.questions || []);
   };
 
   const handleUpdateAd = async (e: React.FormEvent) => {
@@ -217,6 +241,7 @@ const AdminDashboard: React.FC = () => {
           description: editData.description,
           video_url: videoUrl,
           reward_points: editData.rewardPoints,
+          questions: editQuestions.length > 0 ? (editQuestions as any) : []
         })
         .eq('id', editingAd.id);
 
@@ -230,6 +255,7 @@ const AdminDashboard: React.FC = () => {
               description: editData.description,
               video_url: videoUrl,
               reward_points: editData.rewardPoints,
+              questions: editQuestions
             }
           : ad
       ));
@@ -241,6 +267,7 @@ const AdminDashboard: React.FC = () => {
 
       setEditingAd(null);
       setEditVideoFile(null);
+      setEditQuestions([]);
     } catch (error: any) {
       toast({
         title: "Update failed",
@@ -491,6 +518,102 @@ const AdminDashboard: React.FC = () => {
                       rows={3}
                     />
                   </div>
+
+                  {/* Quiz Questions Section */}
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-base">Quiz Questions (Optional)</Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Add questions users must answer after watching the ad
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newQuestion: Question = {
+                            id: Date.now().toString(),
+                            question: '',
+                            options: ['', '', '', ''],
+                            correctAnswer: 0
+                          };
+                          setQuestions([...questions, newQuestion]);
+                        }}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Question
+                      </Button>
+                    </div>
+
+                    {questions.map((q, qIndex) => (
+                      <Card key={q.id} className="p-4 bg-muted/30">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-sm font-medium">Question {qIndex + 1}</Label>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setQuestions(questions.filter((_, i) => i !== qIndex))}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                          
+                          <Input
+                            value={q.question}
+                            onChange={(e) => {
+                              const updated = [...questions];
+                              updated[qIndex].question = e.target.value;
+                              setQuestions(updated);
+                            }}
+                            placeholder="Enter your question"
+                            required={questions.length > 0}
+                          />
+
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Answer Options</Label>
+                            {q.options.map((option, optIndex) => (
+                              <div key={optIndex} className="flex gap-2 items-center">
+                                <Input
+                                  value={option}
+                                  onChange={(e) => {
+                                    const updated = [...questions];
+                                    updated[qIndex].options[optIndex] = e.target.value;
+                                    setQuestions(updated);
+                                  }}
+                                  placeholder={`Option ${optIndex + 1}`}
+                                  required={questions.length > 0}
+                                />
+                                <input
+                                  type="radio"
+                                  name={`correct-${qIndex}`}
+                                  checked={q.correctAnswer === optIndex}
+                                  onChange={() => {
+                                    const updated = [...questions];
+                                    updated[qIndex].correctAnswer = optIndex;
+                                    setQuestions(updated);
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                                <Label className="text-xs whitespace-nowrap">
+                                  Correct
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+
+                    {questions.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        ✓ {questions.length} question{questions.length !== 1 ? 's' : ''} added
+                      </p>
+                    )}
+                  </div>
                   
                   <div className="flex gap-2">
                     <Button type="submit" disabled={uploading}>
@@ -560,6 +683,14 @@ const AdminDashboard: React.FC = () => {
                                 <span>Reward: {ad.reward_points} points</span>
                                 <span>•</span>
                                 <span>Created: {new Date(ad.created_at).toLocaleDateString()}</span>
+                                {ad.questions && ad.questions.length > 0 && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-blue-600">
+                                      📝 {ad.questions.length} quiz question{ad.questions.length !== 1 ? 's' : ''}
+                                    </span>
+                                  </>
+                                )}
                               </div>
                             </div>
                             
@@ -684,6 +815,102 @@ const AdminDashboard: React.FC = () => {
                 placeholder="Enter ad description (optional)"
                 rows={3}
               />
+            </div>
+
+            {/* Quiz Questions Section */}
+            <div className="space-y-4 border-t pt-4 max-h-96 overflow-y-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base">Quiz Questions (Optional)</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Add questions users must answer after watching the ad
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const newQuestion: Question = {
+                      id: Date.now().toString(),
+                      question: '',
+                      options: ['', '', '', ''],
+                      correctAnswer: 0
+                    };
+                    setEditQuestions([...editQuestions, newQuestion]);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Question
+                </Button>
+              </div>
+
+              {editQuestions.map((q, qIndex) => (
+                <Card key={q.id} className="p-4 bg-muted/30">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Question {qIndex + 1}</Label>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditQuestions(editQuestions.filter((_, i) => i !== qIndex))}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                    
+                    <Input
+                      value={q.question}
+                      onChange={(e) => {
+                        const updated = [...editQuestions];
+                        updated[qIndex].question = e.target.value;
+                        setEditQuestions(updated);
+                      }}
+                      placeholder="Enter your question"
+                      required={editQuestions.length > 0}
+                    />
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-muted-foreground">Answer Options</Label>
+                      {q.options.map((option, optIndex) => (
+                        <div key={optIndex} className="flex gap-2 items-center">
+                          <Input
+                            value={option}
+                            onChange={(e) => {
+                              const updated = [...editQuestions];
+                              updated[qIndex].options[optIndex] = e.target.value;
+                              setEditQuestions(updated);
+                            }}
+                            placeholder={`Option ${optIndex + 1}`}
+                            required={editQuestions.length > 0}
+                          />
+                          <input
+                            type="radio"
+                            name={`edit-correct-${qIndex}`}
+                            checked={q.correctAnswer === optIndex}
+                            onChange={() => {
+                              const updated = [...editQuestions];
+                              updated[qIndex].correctAnswer = optIndex;
+                              setEditQuestions(updated);
+                            }}
+                            className="h-4 w-4"
+                          />
+                          <Label className="text-xs whitespace-nowrap">
+                            Correct
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+
+              {editQuestions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  ✓ {editQuestions.length} question{editQuestions.length !== 1 ? 's' : ''} added
+                </p>
+              )}
             </div>
             
             <div className="flex gap-2 justify-end">
