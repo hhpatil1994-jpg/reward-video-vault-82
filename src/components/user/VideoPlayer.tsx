@@ -266,12 +266,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
-              <Button
-                className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
-                onClick={() => handleVideoEnd()}
-              >
-                Mark as Completed
-              </Button>
+              {!videoCompleted && (
+                <Button
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
+                  onClick={() => handleVideoEnd()}
+                >
+                  {ad.questions && ad.questions.length > 0 ? 'Start Quiz & Earn Rewards' : 'Claim Reward'}
+                </Button>
+              )}
             </div>
           ) : videoSources && Array.isArray(videoSources) ? (
             <>
