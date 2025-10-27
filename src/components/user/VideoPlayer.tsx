@@ -76,6 +76,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
     };
   }, []);
 
+  // Handle YouTube video end
+  useEffect(() => {
+    if (!ad.video_url || !isYouTubeUrl(ad.video_url)) return;
+
+    const handleYouTubeMessage = (event: MessageEvent) => {
+      if (event.data === 'videoEnded') {
+        handleVideoEnd();
+      }
+    };
+
+    window.addEventListener('message', handleYouTubeMessage);
+    return () => window.removeEventListener('message', handleYouTubeMessage);
+  }, [ad.video_url]);
+
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video || videoError) return;
@@ -213,20 +227,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
 
   const videoSources = getVideoSources(ad.video_url);
   const youtubeVideoId = isYouTubeUrl(ad.video_url) ? getYouTubeVideoId(ad.video_url) : null;
-
-  // Handle YouTube video end
-  useEffect(() => {
-    if (!youtubeVideoId) return;
-
-    const handleYouTubeMessage = (event: MessageEvent) => {
-      if (event.data === 'videoEnded') {
-        handleVideoEnd();
-      }
-    };
-
-    window.addEventListener('message', handleYouTubeMessage);
-    return () => window.removeEventListener('message', handleYouTubeMessage);
-  }, [youtubeVideoId]);
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
