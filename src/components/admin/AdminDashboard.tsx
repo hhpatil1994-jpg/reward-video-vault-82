@@ -195,6 +195,8 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleEditAd = (ad: Ad) => {
+    console.log('Edit ad clicked:', ad);
+    console.log('Ad questions:', ad.questions);
     setEditingAd(ad);
     setEditData({
       title: ad.title,
@@ -202,7 +204,9 @@ const AdminDashboard: React.FC = () => {
       videoUrl: ad.video_url,
       rewardPoints: ad.reward_points
     });
-    setEditQuestions(ad.questions || []);
+    const questionsToEdit = ad.questions || [];
+    console.log('Setting editQuestions to:', questionsToEdit);
+    setEditQuestions(questionsToEdit);
   };
 
   const handleUpdateAd = async (e: React.FormEvent) => {
@@ -737,12 +741,23 @@ const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingAd} onOpenChange={(open) => !open && setEditingAd(null)}>
+      <Dialog open={!!editingAd} onOpenChange={(open) => {
+        if (!open) {
+          setEditingAd(null);
+          setEditQuestions([]);
+          setEditVideoFile(null);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Advertisement</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdateAd} className="flex flex-col flex-1 min-h-0">
+          {editingAd && (
+            <>
+              <div className="text-xs text-muted-foreground mb-2">
+                Debug: {editQuestions.length} questions loaded
+              </div>
+              <form onSubmit={handleUpdateAd} className="flex flex-col flex-1 min-h-0">
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4 pb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -943,6 +958,8 @@ const AdminDashboard: React.FC = () => {
               </Button>
             </div>
           </form>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
