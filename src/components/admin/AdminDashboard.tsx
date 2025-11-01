@@ -533,7 +533,10 @@ const AdminDashboard: React.FC = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Add Question clicked - Upload form', questions.length);
                           const newQuestion: Question = {
                             id: Date.now().toString(),
                             question: '',
@@ -541,6 +544,7 @@ const AdminDashboard: React.FC = () => {
                             correctAnswer: 0
                           };
                           setQuestions([...questions, newQuestion]);
+                          console.log('Question added, new length:', questions.length + 1);
                         }}
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -833,7 +837,10 @@ const AdminDashboard: React.FC = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add Question clicked - Edit form', editQuestions.length);
                     const newQuestion: Question = {
                       id: Date.now().toString(),
                       question: '',
@@ -841,6 +848,7 @@ const AdminDashboard: React.FC = () => {
                       correctAnswer: 0
                     };
                     setEditQuestions([...editQuestions, newQuestion]);
+                    console.log('Question added, new length:', editQuestions.length + 1);
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
