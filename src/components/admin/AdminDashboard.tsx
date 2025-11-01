@@ -874,9 +874,11 @@ const AdminDashboard: React.FC = () => {
                     <Input
                       value={q.question}
                       onChange={(e) => {
+                        console.log('Question text changed:', e.target.value);
                         const updated = [...editQuestions];
                         updated[qIndex].question = e.target.value;
                         setEditQuestions(updated);
+                        console.log('Updated editQuestions:', updated);
                       }}
                       placeholder="Enter your question"
                       required={editQuestions.length > 0}
@@ -889,9 +891,11 @@ const AdminDashboard: React.FC = () => {
                           <Input
                             value={option}
                             onChange={(e) => {
+                              console.log(`Option ${optIndex + 1} changed:`, e.target.value);
                               const updated = [...editQuestions];
                               updated[qIndex].options[optIndex] = e.target.value;
                               setEditQuestions(updated);
+                              console.log('Updated options:', updated[qIndex].options);
                             }}
                             placeholder={`Option ${optIndex + 1}`}
                             required={editQuestions.length > 0}
