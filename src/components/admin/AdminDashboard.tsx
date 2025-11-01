@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Upload, 
   Video, 
@@ -733,11 +734,12 @@ const AdminDashboard: React.FC = () => {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingAd} onOpenChange={(open) => !open && setEditingAd(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Edit Advertisement</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdateAd} className="space-y-4">
+          <ScrollArea className="flex-1 pr-4">
+            <form onSubmit={handleUpdateAd} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="edit-title">Advertisement Title</Label>
@@ -818,7 +820,7 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Quiz Questions Section */}
-            <div className="space-y-4 border-t pt-4 max-h-96 overflow-y-auto">
+            <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
                 <div>
                   <Label className="text-base">Quiz Questions (Optional)</Label>
@@ -926,6 +928,7 @@ const AdminDashboard: React.FC = () => {
               </Button>
             </div>
           </form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
