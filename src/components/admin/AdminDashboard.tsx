@@ -195,8 +195,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleEditAd = (ad: Ad) => {
-    console.log('Edit ad clicked:', ad);
-    console.log('Ad questions:', ad.questions);
     setEditingAd(ad);
     setEditData({
       title: ad.title,
@@ -204,9 +202,7 @@ const AdminDashboard: React.FC = () => {
       videoUrl: ad.video_url,
       rewardPoints: ad.reward_points
     });
-    const questionsToEdit = ad.questions || [];
-    console.log('Setting editQuestions to:', questionsToEdit);
-    setEditQuestions(questionsToEdit);
+    setEditQuestions(ad.questions || []);
   };
 
   const handleUpdateAd = async (e: React.FormEvent) => {
@@ -753,11 +749,7 @@ const AdminDashboard: React.FC = () => {
             <DialogTitle>Edit Advertisement</DialogTitle>
           </DialogHeader>
           {editingAd && (
-            <>
-              <div className="text-xs text-muted-foreground mb-2">
-                Debug: {editQuestions.length} questions loaded
-              </div>
-              <form onSubmit={handleUpdateAd} className="flex flex-col flex-1 min-h-0">
+            <form onSubmit={handleUpdateAd} className="flex flex-col flex-1 min-h-0">
             <ScrollArea className="flex-1 pr-4">
               <div className="space-y-4 pb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -855,7 +847,6 @@ const AdminDashboard: React.FC = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('Add Question clicked - Edit form', editQuestions.length);
                     const newQuestion: Question = {
                       id: Date.now().toString(),
                       question: '',
@@ -863,7 +854,6 @@ const AdminDashboard: React.FC = () => {
                       correctAnswer: 0
                     };
                     setEditQuestions([...editQuestions, newQuestion]);
-                    console.log('Question added, new length:', editQuestions.length + 1);
                   }}
                 >
                   <Plus className="h-4 w-4 mr-2" />
@@ -889,11 +879,9 @@ const AdminDashboard: React.FC = () => {
                     <Input
                       value={q.question}
                       onChange={(e) => {
-                        console.log('Question text changed:', e.target.value);
                         const updated = [...editQuestions];
                         updated[qIndex].question = e.target.value;
                         setEditQuestions(updated);
-                        console.log('Updated editQuestions:', updated);
                       }}
                       placeholder="Enter your question"
                       required={editQuestions.length > 0}
@@ -906,11 +894,9 @@ const AdminDashboard: React.FC = () => {
                           <Input
                             value={option}
                             onChange={(e) => {
-                              console.log(`Option ${optIndex + 1} changed:`, e.target.value);
                               const updated = [...editQuestions];
                               updated[qIndex].options[optIndex] = e.target.value;
                               setEditQuestions(updated);
-                              console.log('Updated options:', updated[qIndex].options);
                             }}
                             placeholder={`Option ${optIndex + 1}`}
                             required={editQuestions.length > 0}
@@ -958,7 +944,6 @@ const AdminDashboard: React.FC = () => {
               </Button>
             </div>
           </form>
-            </>
           )}
         </DialogContent>
       </Dialog>
