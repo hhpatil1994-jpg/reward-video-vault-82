@@ -705,15 +705,17 @@ const AdminDashboard: React.FC = () => {
                                 size="sm"
                                 onClick={() => window.open(ad.video_url, '_blank')}
                               >
-                                <Eye className="h-4 w-4" />
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
                               </Button>
                               <Button
-                                variant="outline"
+                                variant="default"
                                 size="sm"
                                 onClick={() => handleEditAd(ad)}
-                                className="text-blue-600 hover:text-blue-700"
+                                className="bg-blue-600 hover:bg-blue-700"
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit & Questions
                               </Button>
                               <Button
                                 variant="outline"
