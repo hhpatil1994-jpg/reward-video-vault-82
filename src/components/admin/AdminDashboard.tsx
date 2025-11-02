@@ -781,66 +781,26 @@ const AdminDashboard: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="edit-videoUrl">Video URL</Label>
-              <Input
-                id="edit-videoUrl"
-                type="url"
-                value={editData.videoUrl}
-                onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
-                placeholder="Enter video URL"
-                disabled={!!editVideoFile}
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">OR</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-videoFile">Upload New Video File</Label>
-              <Input
-                id="edit-videoFile"
-                type="file"
-                accept="video/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setEditVideoFile(file);
-                  }
-                }}
-                disabled={!!editData.videoUrl && !editVideoFile}
-              />
-              {editVideoFile && (
-                <p className="text-xs text-muted-foreground">
-                  Selected: {editVideoFile.name} ({(editVideoFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Leave empty to keep current video. Max size: 100MB
-              </p>
-            </div>
-            
-            <div className="space-y-2">
               <Label htmlFor="edit-description">Description</Label>
               <Textarea
                 id="edit-description"
                 value={editData.description}
                 onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Enter ad description (optional)"
-                rows={3}
+                rows={2}
               />
             </div>
 
-            {/* Quiz Questions Section */}
-            <div className="space-y-4 border-t pt-4 bg-accent/30 p-4 rounded-lg">
+            {/* Quiz Questions Section - Prominent and Early */}
+            <div className="space-y-4 border-2 border-primary/30 p-4 rounded-lg bg-primary/5">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-lg font-semibold">Quiz Questions</Label>
+                  <Label className="text-lg font-semibold flex items-center gap-2">
+                    📝 Quiz Questions
+                  </Label>
                   <p className="text-sm text-muted-foreground mt-1">
                     {editQuestions.length > 0 
-                      ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click any field to edit`
+                      ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click fields below to edit`
                       : 'Add questions users must answer after watching the ad'}
                   </p>
                 </div>
@@ -929,10 +889,56 @@ const AdminDashboard: React.FC = () => {
 
               {editQuestions.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">No questions added yet</p>
-                  <p className="text-xs mt-1">Click "Add Question" to create quiz questions</p>
+                  <p className="text-sm font-medium">No questions added yet</p>
+                  <p className="text-xs mt-1">Click "Add Question" button above to create quiz questions</p>
                 </div>
               )}
+            </div>
+
+            {/* Video Section */}
+            <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
+              <h3 className="font-semibold text-sm text-muted-foreground">Video Settings (Optional)</h3>
+            <div className="space-y-2">
+              <Label htmlFor="edit-videoUrl">Video URL</Label>
+              <Input
+                id="edit-videoUrl"
+                type="url"
+                value={editData.videoUrl}
+                onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                placeholder="Enter video URL"
+                disabled={!!editVideoFile}
+              />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-muted-foreground">OR</span>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-videoFile">Upload New Video File</Label>
+              <Input
+                id="edit-videoFile"
+                type="file"
+                accept="video/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setEditVideoFile(file);
+                  }
+                }}
+                disabled={!!editData.videoUrl && !editVideoFile}
+              />
+              {editVideoFile && (
+                <p className="text-xs text-muted-foreground">
+                  Selected: {editVideoFile.name} ({(editVideoFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Leave empty to keep current video. Max size: 100MB
+              </p>
+            </div>
             </div>
               </div>
             </ScrollArea>
