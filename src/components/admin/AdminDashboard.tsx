@@ -832,17 +832,19 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             {/* Quiz Questions Section */}
-            <div className="space-y-4 border-t pt-4">
+            <div className="space-y-4 border-t pt-4 bg-accent/30 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-base">Quiz Questions (Optional)</Label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Add questions users must answer after watching the ad
+                  <Label className="text-lg font-semibold">Quiz Questions</Label>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {editQuestions.length > 0 
+                      ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click any field to edit`
+                      : 'Add questions users must answer after watching the ad'}
                   </p>
                 </div>
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={(e) => {
                     e.preventDefault();
@@ -862,17 +864,18 @@ const AdminDashboard: React.FC = () => {
               </div>
 
               {editQuestions.map((q, qIndex) => (
-                <Card key={q.id} className="p-4 bg-muted/30">
+                <Card key={q.id} className="p-4 bg-background border-2">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <Label className="text-sm font-medium">Question {qIndex + 1}</Label>
+                      <Label className="text-base font-semibold">Question {qIndex + 1}</Label>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="destructive"
                         size="sm"
                         onClick={() => setEditQuestions(editQuestions.filter((_, i) => i !== qIndex))}
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
                       </Button>
                     </div>
                     
@@ -922,10 +925,11 @@ const AdminDashboard: React.FC = () => {
                 </Card>
               ))}
 
-              {editQuestions.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  ✓ {editQuestions.length} question{editQuestions.length !== 1 ? 's' : ''} added
-                </p>
+              {editQuestions.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">No questions added yet</p>
+                  <p className="text-xs mt-1">Click "Add Question" to create quiz questions</p>
+                </div>
               )}
             </div>
               </div>
