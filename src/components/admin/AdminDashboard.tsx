@@ -587,7 +587,7 @@ const AdminDashboard: React.FC = () => {
 
                           <div className="space-y-2">
                             <Label className="text-xs text-muted-foreground">Answer Options</Label>
-                            {q.options.map((option, optIndex) => (
+                            {(q.options || []).map((option, optIndex) => (
                               <div key={optIndex} className="flex gap-2 items-center">
                                 <Input
                                   value={option}
