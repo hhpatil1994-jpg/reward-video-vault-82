@@ -99,7 +99,14 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        questions: (ad.questions as any) || []
+        description: ad.description || '',
+        video_url: ad.video_url || '',
+        questions: Array.isArray(ad.questions) 
+          ? (ad.questions as any[]).map((q: any) => ({
+              ...q,
+              options: Array.isArray(q.options) ? q.options : []
+            }))
+          : []
       }));
 
       setAds(transformedAds);

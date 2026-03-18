@@ -106,7 +106,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
           <h3 className="font-medium text-lg mb-4">{question.question}</h3>
           
           <div className="space-y-3">
-            {question.options.map((option, index) => (
+            {(question.options || []).map((option, index) => (
               <motion.div
                 key={index}
                 whileHover={{ scale: 1.02 }}
