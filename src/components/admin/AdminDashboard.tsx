@@ -99,7 +99,14 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        questions: (ad.questions as any) || []
+        description: ad.description || '',
+        video_url: ad.video_url || '',
+        questions: Array.isArray(ad.questions) 
+          ? (ad.questions as any[]).map((q: any) => ({
+              ...q,
+              options: Array.isArray(q.options) ? q.options : []
+            }))
+          : []
       }));
 
       setAds(transformedAds);
@@ -580,7 +587,7 @@ const AdminDashboard: React.FC = () => {
 
                           <div className="space-y-2">
                             <Label className="text-xs text-muted-foreground">Answer Options</Label>
-                            {q.options.map((option, optIndex) => (
+                            {(q.options || []).map((option, optIndex) => (
                               <div key={optIndex} className="flex gap-2 items-center">
                                 <Input
                                   value={option}
@@ -854,7 +861,7 @@ const AdminDashboard: React.FC = () => {
 
                     <div className="space-y-2">
                       <Label className="text-xs text-muted-foreground">Answer Options</Label>
-                      {q.options.map((option, optIndex) => (
+                      {(q.options || []).map((option, optIndex) => (
                         <div key={optIndex} className="flex gap-2 items-center">
                           <Input
                             value={option}
