@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { 
   Upload, 
   Video, 
@@ -753,216 +753,217 @@ const AdminDashboard: React.FC = () => {
           setEditVideoFile(null);
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogContent className="flex max-h-[90dvh] w-[calc(100vw-1rem)] max-w-2xl flex-col overflow-hidden p-6">
           <DialogHeader>
             <DialogTitle>Edit Advertisement</DialogTitle>
           </DialogHeader>
           {editingAd && (
-            <form onSubmit={handleUpdateAd} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="flex-1 pr-4" style={{ maxHeight: 'calc(90vh - 10rem)' }}>
-              <div className="space-y-4 pb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-title">Advertisement Title</Label>
-                <Input
-                  id="edit-title"
-                  value={editData.title}
-                  onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Enter ad title"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-points">Reward Points</Label>
-                <Input
-                  id="edit-points"
-                  type="number"
-                  min="1"
-                  value={editData.rewardPoints}
-                  onChange={(e) => setEditData(prev => ({ ...prev, rewardPoints: parseInt(e.target.value) }))}
-                  placeholder="Points to award"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={editData.description}
-                onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter ad description (optional)"
-                rows={2}
-              />
-            </div>
-
-            {/* Quiz Questions Section - Prominent and Early */}
-            <div className="space-y-4 border-2 border-primary/30 p-4 rounded-lg bg-primary/5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-lg font-semibold flex items-center gap-2">
-                    📝 Quiz Questions
-                  </Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {editQuestions.length > 0 
-                      ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click fields below to edit`
-                      : 'Add questions users must answer after watching the ad'}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="default"
-                  size="sm"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const newQuestion: Question = {
-                      id: Date.now().toString(),
-                      question: '',
-                      options: ['', '', '', ''],
-                      correctAnswer: 0
-                    };
-                    setEditQuestions([...editQuestions, newQuestion]);
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Question
-                </Button>
-              </div>
-
-              {editQuestions.map((q, qIndex) => (
-                <Card key={q.id} className="p-4 bg-background border-2">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-base font-semibold">Question {qIndex + 1}</Label>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setEditQuestions(editQuestions.filter((_, i) => i !== qIndex))}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Remove
-                      </Button>
+            <form onSubmit={handleUpdateAd} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div
+                className="flex-1 min-h-0 overflow-y-auto overscroll-contain pr-2"
+                style={{ WebkitOverflowScrolling: 'touch' }}
+              >
+                <div className="space-y-4 pb-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-title">Advertisement Title</Label>
+                      <Input
+                        id="edit-title"
+                        value={editData.title}
+                        onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Enter ad title"
+                        required
+                      />
                     </div>
-                    
-                    <Input
-                      value={q.question}
-                      onChange={(e) => {
-                        const updated = [...editQuestions];
-                        updated[qIndex].question = e.target.value;
-                        setEditQuestions(updated);
-                      }}
-                      placeholder="Enter your question"
-                      required={editQuestions.length > 0}
-                    />
 
                     <div className="space-y-2">
-                      <Label className="text-xs text-muted-foreground">Answer Options</Label>
-                      {(q.options || []).map((option, optIndex) => (
-                        <div key={optIndex} className="flex gap-2 items-center">
-                          <Input
-                            value={option}
-                            onChange={(e) => {
-                              const updated = [...editQuestions];
-                              updated[qIndex].options[optIndex] = e.target.value;
-                              setEditQuestions(updated);
-                            }}
-                            placeholder={`Option ${optIndex + 1}`}
-                            required={editQuestions.length > 0}
-                          />
-                          <input
-                            type="radio"
-                            name={`edit-correct-${qIndex}`}
-                            checked={q.correctAnswer === optIndex}
-                            onChange={() => {
-                              const updated = [...editQuestions];
-                              updated[qIndex].correctAnswer = optIndex;
-                              setEditQuestions(updated);
-                            }}
-                            className="h-4 w-4"
-                          />
-                          <Label className="text-xs whitespace-nowrap">
-                            Correct
-                          </Label>
-                        </div>
-                      ))}
+                      <Label htmlFor="edit-points">Reward Points</Label>
+                      <Input
+                        id="edit-points"
+                        type="number"
+                        min="1"
+                        value={editData.rewardPoints}
+                        onChange={(e) => setEditData(prev => ({ ...prev, rewardPoints: parseInt(e.target.value) }))}
+                        placeholder="Points to award"
+                        required
+                      />
                     </div>
                   </div>
-                </Card>
-              ))}
 
-              {editQuestions.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm font-medium">No questions added yet</p>
-                  <p className="text-xs mt-1">Click "Add Question" button above to create quiz questions</p>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-description">Description</Label>
+                    <Textarea
+                      id="edit-description"
+                      value={editData.description}
+                      onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Enter ad description (optional)"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-4 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <Label className="flex items-center gap-2 text-lg font-semibold">
+                          📝 Quiz Questions
+                        </Label>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {editQuestions.length > 0
+                            ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click fields below to edit`
+                            : 'Add questions users must answer after watching the ad'}
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="default"
+                        size="sm"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const newQuestion: Question = {
+                            id: Date.now().toString(),
+                            question: '',
+                            options: ['', '', '', ''],
+                            correctAnswer: 0
+                          };
+                          setEditQuestions([...editQuestions, newQuestion]);
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Question
+                      </Button>
+                    </div>
+
+                    {editQuestions.map((q, qIndex) => (
+                      <Card key={q.id} className="border-2 bg-background p-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <Label className="text-base font-semibold">Question {qIndex + 1}</Label>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => setEditQuestions(editQuestions.filter((_, i) => i !== qIndex))}
+                            >
+                              <Trash2 className="mr-1 h-4 w-4" />
+                              Remove
+                            </Button>
+                          </div>
+
+                          <Input
+                            value={q.question}
+                            onChange={(e) => {
+                              const updated = [...editQuestions];
+                              updated[qIndex].question = e.target.value;
+                              setEditQuestions(updated);
+                            }}
+                            placeholder="Enter your question"
+                            required={editQuestions.length > 0}
+                          />
+
+                          <div className="space-y-2">
+                            <Label className="text-xs text-muted-foreground">Answer Options</Label>
+                            {(q.options || []).map((option, optIndex) => (
+                              <div key={optIndex} className="flex items-center gap-2">
+                                <Input
+                                  value={option}
+                                  onChange={(e) => {
+                                    const updated = [...editQuestions];
+                                    updated[qIndex].options[optIndex] = e.target.value;
+                                    setEditQuestions(updated);
+                                  }}
+                                  placeholder={`Option ${optIndex + 1}`}
+                                  required={editQuestions.length > 0}
+                                />
+                                <input
+                                  type="radio"
+                                  name={`edit-correct-${qIndex}`}
+                                  checked={q.correctAnswer === optIndex}
+                                  onChange={() => {
+                                    const updated = [...editQuestions];
+                                    updated[qIndex].correctAnswer = optIndex;
+                                    setEditQuestions(updated);
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                                <Label className="whitespace-nowrap text-xs">
+                                  Correct
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+
+                    {editQuestions.length === 0 && (
+                      <div className="py-8 text-center text-muted-foreground">
+                        <p className="text-sm font-medium">No questions added yet</p>
+                        <p className="mt-1 text-xs">Click "Add Question" button above to create quiz questions</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4 rounded-lg bg-muted/30 p-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Video Settings (Optional)</h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-videoUrl">Video URL</Label>
+                      <Input
+                        id="edit-videoUrl"
+                        type="url"
+                        value={editData.videoUrl}
+                        onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
+                        placeholder="Enter video URL"
+                        disabled={!!editVideoFile}
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="h-px flex-1 bg-border" />
+                      <span className="text-xs text-muted-foreground">OR</span>
+                      <div className="h-px flex-1 bg-border" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-videoFile">Upload New Video File</Label>
+                      <Input
+                        id="edit-videoFile"
+                        type="file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setEditVideoFile(file);
+                          }
+                        }}
+                        disabled={!!editData.videoUrl && !editVideoFile}
+                      />
+                      {editVideoFile && (
+                        <p className="text-xs text-muted-foreground">
+                          Selected: {editVideoFile.name} ({(editVideoFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty to keep current video. Max size: 100MB
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Video Section */}
-            <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
-              <h3 className="font-semibold text-sm text-muted-foreground">Video Settings (Optional)</h3>
-            <div className="space-y-2">
-              <Label htmlFor="edit-videoUrl">Video URL</Label>
-              <Input
-                id="edit-videoUrl"
-                type="url"
-                value={editData.videoUrl}
-                onChange={(e) => setEditData(prev => ({ ...prev, videoUrl: e.target.value }))}
-                placeholder="Enter video URL"
-                disabled={!!editVideoFile}
-              />
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-muted-foreground">OR</span>
-              <div className="flex-1 h-px bg-border" />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-videoFile">Upload New Video File</Label>
-              <Input
-                id="edit-videoFile"
-                type="file"
-                accept="video/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setEditVideoFile(file);
-                  }
-                }}
-                disabled={!!editData.videoUrl && !editVideoFile}
-              />
-              {editVideoFile && (
-                <p className="text-xs text-muted-foreground">
-                  Selected: {editVideoFile.name} ({(editVideoFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Leave empty to keep current video. Max size: 100MB
-              </p>
-            </div>
-            </div>
               </div>
-            </ScrollArea>
-            
-            <div className="flex gap-2 justify-end pt-4 border-t mt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setEditingAd(null)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={uploading}>
-                {uploading ? "Updating..." : "Update Advertisement"}
-              </Button>
-            </div>
-          </form>
+
+              <div className="mt-4 flex shrink-0 justify-end gap-2 border-t pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditingAd(null)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={uploading}>
+                  {uploading ? "Updating..." : "Update Advertisement"}
+                </Button>
+              </div>
+            </form>
           )}
         </DialogContent>
       </Dialog>
