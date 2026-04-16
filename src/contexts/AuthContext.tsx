@@ -30,10 +30,13 @@ export const useAuth = () => {
 };
 
 async function fetchUserRole(userId: string): Promise<'user' | 'admin'> {
-  const { data } = await supabase.rpc('has_role' as any, {
-    _user_id: userId,
-    _role: 'admin',
-  });
+  // Use raw SQL via postgrest to check role since user_roles may not be in generated types yet
+  const { data, error } = await supabase
+    .from('user_roles' as any)
+    .select('role' as any)
+    .eq('user_id' as any, userId)
+    .eq('role' as any, 'admin')
+    .maybeSingle();
   return data ? 'admin' : 'user';
 }
 
