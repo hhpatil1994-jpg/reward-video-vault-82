@@ -42,7 +42,6 @@ const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [stats, setStats] = useState<UserStats>({
     totalPoints: 0,
     adsWatched: 0,
