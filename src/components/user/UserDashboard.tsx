@@ -6,6 +6,7 @@ import VideoPlayer from './VideoPlayer';
 import AddVideoForm from './AddVideoForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Coins, 
   Play, 
