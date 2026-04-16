@@ -6,6 +6,7 @@ import VideoPlayer from './VideoPlayer';
 import AddVideoForm from './AddVideoForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   Coins, 
   Play, 
@@ -39,6 +40,7 @@ interface UserStats {
 }
 
 const UserDashboard: React.FC = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -184,12 +186,14 @@ const UserDashboard: React.FC = () => {
             <p className="text-sm text-muted-foreground">Welcome to the rewards platform</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/admin')}
-            >
-              Admin Panel
-            </Button>
+            {user?.role === 'admin' && (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/admin')}
+              >
+                Admin Panel
+              </Button>
+            )}
             <Button
               onClick={() => setShowAddForm(true)}
               className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
