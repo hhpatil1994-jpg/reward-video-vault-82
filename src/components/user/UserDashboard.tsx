@@ -168,11 +168,9 @@ const UserDashboard: React.FC = () => {
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    const { signOut } = await import('@/contexts/AuthContext').then(m => ({ signOut: m.useAuth }));
-                    // handled inline
                     const { supabase } = await import('@/integrations/supabase/client');
                     await supabase.auth.signOut();
-                    window.location.reload();
+                    navigate('/');
                   }}
                 >
                   Logout
