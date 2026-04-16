@@ -135,27 +135,6 @@ const UserDashboard: React.FC = () => {
     );
   }
 
-  if (showAddForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setShowAddForm(false)}
-              className="mb-4"
-            >
-              ← Back to Dashboard
-            </Button>
-          </div>
-          <AddVideoForm 
-            onVideoAdded={handleVideoAdded}
-            onCancel={() => setShowAddForm(false)}
-          />
-        </div>
-      </div>
-    );
-  }
 
   if (selectedAd) {
     return (
@@ -194,13 +173,6 @@ const UserDashboard: React.FC = () => {
                 Admin Panel
               </Button>
             )}
-            <Button
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Video
-            </Button>
           </div>
         </div>
       </header>

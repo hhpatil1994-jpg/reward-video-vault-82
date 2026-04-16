@@ -1,14 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import LoginForm from './LoginForm';
-import SignupForm from './SignupForm';
 import { motion } from 'framer-motion';
 
 const AuthPage: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
-
-  const toggleMode = () => setIsLogin(!isLogin);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -21,21 +16,16 @@ const AuthPage: React.FC = () => {
             RewardAd
           </h1>
           <p className="text-muted-foreground">
-            Watch ads, earn rewards, and redeem amazing prizes
+            Admin Login
           </p>
         </motion.div>
 
         <motion.div
-          key={isLogin ? 'login' : 'signup'}
-          initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
+          initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {isLogin ? (
-            <LoginForm onToggleMode={toggleMode} />
-          ) : (
-            <SignupForm onToggleMode={toggleMode} />
-          )}
+          <LoginForm onToggleMode={() => {}} />
         </motion.div>
       </div>
     </div>
