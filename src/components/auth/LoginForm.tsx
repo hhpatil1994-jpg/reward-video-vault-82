@@ -95,17 +95,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
           </Button>
         </form>
 
-        <div className="mt-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <button
-              onClick={onToggleMode}
-              className="text-primary hover:underline font-medium"
-            >
-              Sign up here
-            </button>
-          </p>
-        </div>
       </CardContent>
     </Card>
   );
