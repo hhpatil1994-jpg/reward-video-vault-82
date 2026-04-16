@@ -47,7 +47,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
     setLoading(true);
 
     try {
-      await signUp(email, password, role);
+      await signUp(email, password);
       toast({
         title: "Account created!",
         description: "Welcome to RewardAd! Please check your email to verify your account.",

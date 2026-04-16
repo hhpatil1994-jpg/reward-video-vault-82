@@ -30,12 +30,11 @@ export const useAuth = () => {
 };
 
 async function fetchUserRole(userId: string): Promise<'user' | 'admin'> {
-  const { data } = await supabase
-    .from('user_roles')
-    .select('role')
-    .eq('user_id', userId)
-    .single();
-  return (data?.role as 'user' | 'admin') || 'user';
+  const { data } = await supabase.rpc('has_role' as any, {
+    _user_id: userId,
+    _role: 'admin',
+  });
+  return data ? 'admin' : 'user';
 }
 
 async function buildUser(supabaseUser: SupabaseUser): Promise<User> {
