@@ -10,8 +10,7 @@ import {
   Coins, 
   Play, 
   TrendingUp, 
-  Video,
-  Plus
+  Video
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
