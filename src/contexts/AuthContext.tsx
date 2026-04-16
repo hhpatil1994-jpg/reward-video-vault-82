@@ -30,14 +30,21 @@ export const useAuth = () => {
 };
 
 async function fetchUserRole(userId: string): Promise<'user' | 'admin'> {
-  // Use raw SQL via postgrest to check role since user_roles may not be in generated types yet
-  const { data, error } = await supabase
-    .from('user_roles' as any)
-    .select('role' as any)
-    .eq('user_id' as any, userId)
-    .eq('role' as any, 'admin')
-    .maybeSingle();
-  return data ? 'admin' : 'user';
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_roles?user_id=eq.${userId}&role=eq.admin&select=role`,
+      {
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      }
+    );
+    const data = await response.json();
+    return Array.isArray(data) && data.length > 0 ? 'admin' : 'user';
+  } catch {
+    return 'user';
+  }
 }
 
 async function buildUser(supabaseUser: SupabaseUser): Promise<User> {
