@@ -157,12 +157,31 @@ const UserDashboard: React.FC = () => {
             <p className="text-sm text-muted-foreground">Welcome to the rewards platform</p>
           </div>
           <div className="flex gap-2">
-            {user?.role === 'admin' && (
+            {user?.role === 'admin' ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/admin')}
+                >
+                  Admin Panel
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={async () => {
+                    const { supabase } = await import('@/integrations/supabase/client');
+                    await supabase.auth.signOut();
+                    navigate('/');
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
               <Button
                 variant="outline"
-                onClick={() => navigate('/admin')}
+                onClick={() => navigate('/auth')}
               >
-                Admin Panel
+                Admin Login
               </Button>
             )}
           </div>
