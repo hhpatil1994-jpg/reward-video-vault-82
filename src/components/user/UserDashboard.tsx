@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import VideoPlayer from './VideoPlayer';
-import AddVideoForm from './AddVideoForm';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,8 +10,7 @@ import {
   Coins, 
   Play, 
   TrendingUp, 
-  Video,
-  Plus
+  Video
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -44,7 +42,6 @@ const UserDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [stats, setStats] = useState<UserStats>({
     totalPoints: 0,
     adsWatched: 0,
@@ -118,11 +115,6 @@ const UserDashboard: React.FC = () => {
     setSelectedAd(null);
   };
 
-  const handleVideoAdded = (newVideo: Ad) => {
-    setAds(prev => [newVideo, ...prev]);
-    setShowAddForm(false);
-    fetchAds(); // Refresh the list
-  };
 
   if (loading) {
     return (
@@ -135,27 +127,6 @@ const UserDashboard: React.FC = () => {
     );
   }
 
-  if (showAddForm) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <Button
-              variant="outline"
-              onClick={() => setShowAddForm(false)}
-              className="mb-4"
-            >
-              ← Back to Dashboard
-            </Button>
-          </div>
-          <AddVideoForm 
-            onVideoAdded={handleVideoAdded}
-            onCancel={() => setShowAddForm(false)}
-          />
-        </div>
-      </div>
-    );
-  }
 
   if (selectedAd) {
     return (
@@ -194,13 +165,6 @@ const UserDashboard: React.FC = () => {
                 Admin Panel
               </Button>
             )}
-            <Button
-              onClick={() => setShowAddForm(true)}
-              className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Video
-            </Button>
           </div>
         </div>
       </header>
@@ -286,16 +250,12 @@ const UserDashboard: React.FC = () => {
               {ads.length === 0 ? (
                 <div className="text-center py-12">
                   <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                    No ads available
+                  <h3 className="text-lg font-medium text-muted-foreground">
+                    No ads available yet
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Add your first video advertisement to get started!
+                  <p className="text-sm text-muted-foreground">
+                    Check back later for new advertisements!
                   </p>
-                  <Button onClick={() => setShowAddForm(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Video
-                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
