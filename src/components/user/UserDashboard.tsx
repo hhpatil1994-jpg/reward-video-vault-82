@@ -115,11 +115,6 @@ const UserDashboard: React.FC = () => {
     setSelectedAd(null);
   };
 
-  const handleVideoAdded = (newVideo: Ad) => {
-    setAds(prev => [newVideo, ...prev]);
-    setShowAddForm(false);
-    fetchAds(); // Refresh the list
-  };
 
   if (loading) {
     return (
@@ -255,16 +250,12 @@ const UserDashboard: React.FC = () => {
               {ads.length === 0 ? (
                 <div className="text-center py-12">
                   <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                    No ads available
+                  <h3 className="text-lg font-medium text-muted-foreground">
+                    No ads available yet
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Add your first video advertisement to get started!
+                  <p className="text-sm text-muted-foreground">
+                    Check back later for new advertisements!
                   </p>
-                  <Button onClick={() => setShowAddForm(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Video
-                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
