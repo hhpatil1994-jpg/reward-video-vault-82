@@ -27,12 +27,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
     setLoading(true);
 
     try {
-      await signIn(email, password);
+      const loggedInUser = await signIn(email, password);
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      navigate('/admin');
+      if (loggedInUser.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (error: any) {
       toast({
         title: "Login failed",

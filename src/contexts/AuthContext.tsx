@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export { supabase };
 
@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -29,14 +29,14 @@ export const useAuth = () => {
   return context;
 };
 
-async function fetchUserRole(userId: string): Promise<'user' | 'admin'> {
+async function fetchUserRole(userId: string, accessToken: string): Promise<'user' | 'admin'> {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_roles?user_id=eq.${userId}&role=eq.admin&select=role`,
       {
         headers: {
           apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -47,8 +47,8 @@ async function fetchUserRole(userId: string): Promise<'user' | 'admin'> {
   }
 }
 
-async function buildUser(supabaseUser: SupabaseUser): Promise<User> {
-  const role = await fetchUserRole(supabaseUser.id);
+async function buildUser(supabaseUser: SupabaseUser, accessToken: string): Promise<User> {
+  const role = await fetchUserRole(supabaseUser.id, accessToken);
   return {
     id: supabaseUser.id,
     email: supabaseUser.email || '',
@@ -61,10 +61,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (session?.user) {
-          const appUser = await buildUser(session.user);
+        if (session?.user && session.access_token) {
+          const appUser = await buildUser(session.user, session.access_token);
           setUser(appUser);
         } else {
           setUser(null);
@@ -73,9 +74,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
+    // Then check existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const appUser = await buildUser(session.user);
+      if (session?.user && session.access_token) {
+        const appUser = await buildUser(session.user, session.access_token);
         setUser(appUser);
       }
       setLoading(false);
@@ -84,9 +86,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signIn = async (email: string, password: string): Promise<User> => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    const appUser = await buildUser(data.user, data.session.access_token);
+    setUser(appUser);
+    return appUser;
   };
 
   const signUp = async (email: string, password: string) => {
