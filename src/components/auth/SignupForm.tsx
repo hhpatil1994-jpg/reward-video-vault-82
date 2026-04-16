@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 interface SignupFormProps {
   onToggleMode: () => void;
@@ -17,7 +17,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'user' | 'admin'>('user');
+  
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
@@ -89,22 +89,6 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="role">Account Type</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
-              <Select value={role} onValueChange={(value: 'user' | 'admin') => setRole(value)}>
-                <SelectTrigger className="pl-10">
-                  <SelectValue placeholder="Select account type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">User (Watch ads & earn rewards)</SelectItem>
-                  <SelectItem value="admin">Admin (Manage ads & users)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
           <div className="space-y-2">
             <Label htmlFor="signup-password">Password</Label>
             <div className="relative">
