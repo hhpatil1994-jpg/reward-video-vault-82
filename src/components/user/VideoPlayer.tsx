@@ -247,7 +247,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
   const youtubeVideoId = isYouTubeUrl(ad.video_url) ? getYouTubeVideoId(ad.video_url) : null;
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
+    <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{ad.title}</span>
@@ -266,7 +266,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="relative bg-black rounded-lg overflow-hidden">
+        <div ref={playerContainerRef} className="relative bg-black rounded-lg overflow-hidden">
           {videoError ? (
             <div className="w-full aspect-video flex items-center justify-center bg-gray-800 text-white">
               <div className="text-center">
@@ -277,13 +277,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
           ) : youtubeVideoId ? (
             <div className="relative w-full aspect-video">
               <iframe
+                ref={iframeRef}
                 className="w-full h-full"
                 src={`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&rel=0`}
                 title={ad.title}
                 frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
               />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="absolute top-2 right-2 z-10 gap-1"
+                onClick={handleFullscreen}
+              >
+                <Maximize className="h-4 w-4" />
+                Fullscreen
+              </Button>
               {!videoCompleted && (
                 <Button
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
@@ -336,6 +346,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
                     <Progress value={progress} className="flex-1" />
                     <span>{formatTime(duration)}</span>
                   </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleFullscreen}
+                    className="text-white hover:bg-white/20"
+                    disabled={videoError}
+                  >
+                    <Maximize className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </>
