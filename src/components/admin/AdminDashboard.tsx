@@ -13,7 +13,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { KeyRound } from 'lucide-react';
 
 import { 
   Upload, 
@@ -73,6 +75,10 @@ const AdminDashboard: React.FC = () => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [editVideoFile, setEditVideoFile] = useState<File | null>(null);
   const [editingAd, setEditingAd] = useState<Ad | null>(null);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
   const [editData, setEditData] = useState({
     title: '',
     description: '',
@@ -334,14 +340,87 @@ const AdminDashboard: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-sm text-muted-foreground">Manage advertisements and monitor performance</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-          >
-            ← Back to User Dashboard
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowPasswordDialog(true)}
+            >
+              <KeyRound className="h-4 w-4 mr-1" />
+              Change Password
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/')}
+            >
+              ← Back to User Dashboard
+            </Button>
+          </div>
         </div>
       </header>
+
+      <Dialog open={showPasswordDialog} onOpenChange={(open) => {
+        setShowPasswordDialog(open);
+        if (!open) { setNewPassword(''); setConfirmPassword(''); }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Admin Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)} disabled={changingPassword}>
+              Cancel
+            </Button>
+            <Button
+              disabled={changingPassword}
+              onClick={async () => {
+                if (newPassword.length < 6) {
+                  toast({ title: 'Password too short', description: 'Use at least 6 characters.', variant: 'destructive' });
+                  return;
+                }
+                if (newPassword !== confirmPassword) {
+                  toast({ title: 'Passwords do not match', variant: 'destructive' });
+                  return;
+                }
+                setChangingPassword(true);
+                const { error } = await supabase.auth.updateUser({ password: newPassword });
+                setChangingPassword(false);
+                if (error) {
+                  toast({ title: 'Failed to update password', description: error.message, variant: 'destructive' });
+                } else {
+                  toast({ title: 'Password updated', description: 'Your password has been changed.' });
+                  setShowPasswordDialog(false);
+                  setNewPassword('');
+                  setConfirmPassword('');
+                }
+              }}
+            >
+              {changingPassword ? 'Updating...' : 'Update Password'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Stats Cards */}
