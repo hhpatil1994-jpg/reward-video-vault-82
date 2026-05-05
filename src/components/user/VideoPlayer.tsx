@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { Play, Pause, Volume2, VolumeX, Coins } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Coins, Maximize } from 'lucide-react';
 import { motion } from 'framer-motion';
 import VideoQuiz from './VideoQuiz';
 
@@ -32,6 +32,23 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const handleFullscreen = () => {
+    const el: any =
+      iframeRef.current ||
+      videoRef.current ||
+      playerContainerRef.current;
+    if (!el) return;
+    const req =
+      el.requestFullscreen ||
+      el.webkitRequestFullscreen ||
+      el.webkitEnterFullscreen ||
+      el.msRequestFullscreen;
+    if (req) req.call(el);
+  };
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
