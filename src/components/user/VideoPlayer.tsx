@@ -98,6 +98,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
     if (!ad.video_url || !isYouTubeUrl(ad.video_url)) return;
 
     const handleYouTubeMessage = (event: MessageEvent) => {
+      // Only accept messages from YouTube origins
+      if (
+        event.origin !== 'https://www.youtube.com' &&
+        event.origin !== 'https://www.youtube-nocookie.com'
+      ) {
+        return;
+      }
       if (event.data === 'videoEnded') {
         handleVideoEnd();
       }
