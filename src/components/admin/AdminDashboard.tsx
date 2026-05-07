@@ -505,12 +505,12 @@ const AdminDashboard: React.FC = () => {
           >
             <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Viewers</CardTitle>
                 <Users className="h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                <p className="text-xs text-green-100">Registered users</p>
+                <p className="text-xs text-green-100">Unique ad watchers</p>
               </CardContent>
             </Card>
           </motion.div>
