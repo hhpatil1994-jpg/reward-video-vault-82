@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_views: {
+        Row: {
+          ad_id: string
+          id: string
+          points_earned: number
+          viewer_id: string
+          watched_at: string
+        }
+        Insert: {
+          ad_id: string
+          id?: string
+          points_earned?: number
+          viewer_id: string
+          watched_at?: string
+        }
+        Update: {
+          ad_id?: string
+          id?: string
+          points_earned?: number
+          viewer_id?: string
+          watched_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_views_ad_id_fkey"
+            columns: ["ad_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       advertisements: {
         Row: {
           created_at: string

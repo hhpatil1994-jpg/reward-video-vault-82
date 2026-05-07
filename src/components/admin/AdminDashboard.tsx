@@ -54,9 +54,17 @@ interface AdminStats {
   totalPointsDistributed: number;
 }
 
+interface ViewerRow {
+  viewer_id: string;
+  ads_watched: number;
+  points_earned: number;
+  last_watched: string;
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
+  const [viewers, setViewers] = useState<ViewerRow[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
     totalUsers: 0,
@@ -91,7 +99,55 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchAds();
+    fetchViewers();
   }, []);
+
+  const fetchViewers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ad_views')
+        .select('viewer_id, points_earned, watched_at')
+        .order('watched_at', { ascending: false });
+
+      if (error) throw error;
+
+      const map = new Map<string, ViewerRow>();
+      (data || []).forEach((row: any) => {
+        const existing = map.get(row.viewer_id);
+        if (existing) {
+          existing.ads_watched += 1;
+          existing.points_earned += row.points_earned || 0;
+          if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
+        } else {
+          map.set(row.viewer_id, {
+            viewer_id: row.viewer_id,
+            ads_watched: 1,
+            points_earned: row.points_earned || 0,
+            last_watched: row.watched_at,
+          });
+        }
+      });
+
+      const rows = Array.from(map.values()).sort((a, b) =>
+        b.last_watched.localeCompare(a.last_watched)
+      );
+      setViewers(rows);
+
+      const totalViews = (data || []).length;
+      const totalPoints = (data || []).reduce(
+        (s: number, r: any) => s + (r.points_earned || 0),
+        0
+      );
+      setStats(prev => ({
+        ...prev,
+        totalUsers: rows.length,
+        totalViews,
+        totalPointsDistributed: totalPoints,
+      }));
+    } catch (error: any) {
+      console.warn('Could not load viewers', error);
+    }
+  };
 
   const fetchAds = async () => {
     try {
@@ -449,12 +505,12 @@ const AdminDashboard: React.FC = () => {
           >
             <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium">Total Viewers</CardTitle>
                 <Users className="h-4 w-4" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalUsers}</div>
-                <p className="text-xs text-green-100">Registered users</p>
+                <p className="text-xs text-green-100">Unique ad watchers</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -721,6 +777,58 @@ const AdminDashboard: React.FC = () => {
                 </form>
               </CardContent>
             )}
+          </Card>
+        </motion.div>
+
+        {/* Viewers (people who watched ads) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Ad Viewers
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                People who have watched advertisements
+              </p>
+            </CardHeader>
+            <CardContent>
+              {viewers.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  No viewers yet. Once someone watches an ad they'll appear here.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="py-2 pr-4">Viewer</th>
+                        <th className="py-2 pr-4">Ads Watched</th>
+                        <th className="py-2 pr-4">Points Earned</th>
+                        <th className="py-2 pr-4">Last Watched</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {viewers.map((v) => (
+                        <tr key={v.viewer_id} className="border-b last:border-0">
+                          <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                          <td className="py-2 pr-4">{v.ads_watched}</td>
+                          <td className="py-2 pr-4">{v.points_earned}</td>
+                          <td className="py-2 pr-4">
+                            {new Date(v.last_watched).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
           </Card>
         </motion.div>
 
