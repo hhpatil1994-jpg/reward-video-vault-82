@@ -780,6 +780,58 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </motion.div>
 
+        {/* Viewers (people who watched ads) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="mb-8"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Ad Viewers
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                People who have watched advertisements
+              </p>
+            </CardHeader>
+            <CardContent>
+              {viewers.length === 0 ? (
+                <div className="text-center py-8 text-sm text-muted-foreground">
+                  No viewers yet. Once someone watches an ad they'll appear here.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="py-2 pr-4">Viewer</th>
+                        <th className="py-2 pr-4">Ads Watched</th>
+                        <th className="py-2 pr-4">Points Earned</th>
+                        <th className="py-2 pr-4">Last Watched</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {viewers.map((v) => (
+                        <tr key={v.viewer_id} className="border-b last:border-0">
+                          <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                          <td className="py-2 pr-4">{v.ads_watched}</td>
+                          <td className="py-2 pr-4">{v.points_earned}</td>
+                          <td className="py-2 pr-4">
+                            {new Date(v.last_watched).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Ads Management */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
