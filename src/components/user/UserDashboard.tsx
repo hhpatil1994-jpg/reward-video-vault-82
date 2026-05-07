@@ -96,17 +96,37 @@ const UserDashboard: React.FC = () => {
     }
   };
 
-  const handleAdComplete = (earned: boolean) => {
+  const getViewerId = () => {
+    let viewerId = localStorage.getItem('viewerId');
+    if (!viewerId) {
+      viewerId = `viewer-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+      localStorage.setItem('viewerId', viewerId);
+    }
+    return viewerId;
+  };
+
+  const handleAdComplete = async (earned: boolean) => {
     if (selectedAd && earned) {
       const newStats = {
         totalPoints: stats.totalPoints + selectedAd.reward_points,
         adsWatched: stats.adsWatched + 1,
         totalEarnings: stats.totalEarnings + selectedAd.reward_points
       };
-      
+
       setStats(newStats);
       localStorage.setItem('userStats', JSON.stringify(newStats));
-      
+
+      // Record the view in the database (ignore duplicates)
+      try {
+        await supabase.from('ad_views').insert({
+          viewer_id: getViewerId(),
+          ad_id: selectedAd.id,
+          points_earned: selectedAd.reward_points,
+        });
+      } catch (err) {
+        console.warn('Could not record ad view', err);
+      }
+
       toast({
         title: "Rewards Earned!",
         description: `You've earned ${selectedAd.reward_points} points for completing this ad!`,
