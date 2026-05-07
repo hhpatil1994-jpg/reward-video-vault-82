@@ -54,9 +54,17 @@ interface AdminStats {
   totalPointsDistributed: number;
 }
 
+interface ViewerRow {
+  viewer_id: string;
+  ads_watched: number;
+  points_earned: number;
+  last_watched: string;
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
+  const [viewers, setViewers] = useState<ViewerRow[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
     totalUsers: 0,
@@ -91,7 +99,55 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchAds();
+    fetchViewers();
   }, []);
+
+  const fetchViewers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ad_views')
+        .select('viewer_id, points_earned, watched_at')
+        .order('watched_at', { ascending: false });
+
+      if (error) throw error;
+
+      const map = new Map<string, ViewerRow>();
+      (data || []).forEach((row: any) => {
+        const existing = map.get(row.viewer_id);
+        if (existing) {
+          existing.ads_watched += 1;
+          existing.points_earned += row.points_earned || 0;
+          if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
+        } else {
+          map.set(row.viewer_id, {
+            viewer_id: row.viewer_id,
+            ads_watched: 1,
+            points_earned: row.points_earned || 0,
+            last_watched: row.watched_at,
+          });
+        }
+      });
+
+      const rows = Array.from(map.values()).sort((a, b) =>
+        b.last_watched.localeCompare(a.last_watched)
+      );
+      setViewers(rows);
+
+      const totalViews = (data || []).length;
+      const totalPoints = (data || []).reduce(
+        (s: number, r: any) => s + (r.points_earned || 0),
+        0
+      );
+      setStats(prev => ({
+        ...prev,
+        totalUsers: rows.length,
+        totalViews,
+        totalPointsDistributed: totalPoints,
+      }));
+    } catch (error: any) {
+      console.warn('Could not load viewers', error);
+    }
+  };
 
   const fetchAds = async () => {
     try {
