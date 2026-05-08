@@ -100,6 +100,28 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     fetchAds();
     fetchViewers();
+
+    const channel = supabase
+      .channel('admin-dashboard-live')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ad_views' },
+        () => {
+          fetchViewers();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'advertisements' },
+        () => {
+          fetchAds();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchViewers = async () => {
