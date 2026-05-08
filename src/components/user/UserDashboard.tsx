@@ -118,11 +118,15 @@ const UserDashboard: React.FC = () => {
 
       // Record the view in the database (ignore duplicates)
       try {
-        await supabase.from('ad_views').insert({
+        const { error } = await supabase.from('ad_views').insert({
           viewer_id: getViewerId(),
           ad_id: selectedAd.id,
           points_earned: selectedAd.reward_points,
         });
+
+        if (error && error.code !== '23505') {
+          throw error;
+        }
       } catch (err) {
         console.warn('Could not record ad view', err);
       }
