@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { KeyRound } from 'lucide-react';
 
 import { 
@@ -827,40 +828,84 @@ const AdminDashboard: React.FC = () => {
                 Ad Viewers
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                People who have watched advertisements
+                Track who completed videos vs who claimed rewards
               </p>
             </CardHeader>
             <CardContent>
-              {viewers.length === 0 ? (
-                <div className="text-center py-8 text-sm text-muted-foreground">
-                  No viewers yet. Once someone watches an ad they'll appear here.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="py-2 pr-4">Viewer</th>
-                        <th className="py-2 pr-4">Ads Watched</th>
-                        <th className="py-2 pr-4">Points Earned</th>
-                        <th className="py-2 pr-4">Last Watched</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {viewers.map((v) => (
-                        <tr key={v.viewer_id} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
-                          <td className="py-2 pr-4">{v.ads_watched}</td>
-                          <td className="py-2 pr-4">{v.points_earned}</td>
-                          <td className="py-2 pr-4">
-                            {new Date(v.last_watched).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <Tabs defaultValue="completed" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md">
+                  <TabsTrigger value="completed">
+                    Completed Views ({completedViewers.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="claimed">
+                    Claimed Rewards ({claimedViewers.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="completed" className="mt-4">
+                  {completedViewers.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-muted-foreground">
+                      No completed views yet. Once someone finishes watching an ad they'll appear here.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-left text-muted-foreground">
+                            <th className="py-2 pr-4">Viewer</th>
+                            <th className="py-2 pr-4">Videos Completed</th>
+                            <th className="py-2 pr-4">Last Watched</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {completedViewers.map((v) => (
+                            <tr key={v.viewer_id} className="border-b last:border-0">
+                              <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">
+                                {new Date(v.last_watched).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="claimed" className="mt-4">
+                  {claimedViewers.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-muted-foreground">
+                      No claimed rewards yet. Viewers who pass the quiz will appear here.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-left text-muted-foreground">
+                            <th className="py-2 pr-4">Viewer</th>
+                            <th className="py-2 pr-4">Rewards Claimed</th>
+                            <th className="py-2 pr-4">Points Earned</th>
+                            <th className="py-2 pr-4">Last Claimed</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {claimedViewers.map((v) => (
+                            <tr key={v.viewer_id} className="border-b last:border-0">
+                              <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">{v.points_earned}</td>
+                              <td className="py-2 pr-4">
+                                {new Date(v.last_watched).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </motion.div>
