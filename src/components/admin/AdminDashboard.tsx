@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { KeyRound } from 'lucide-react';
 
 import { 
@@ -64,7 +65,8 @@ interface ViewerRow {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
-  const [viewers, setViewers] = useState<ViewerRow[]>([]);
+  const [completedViewers, setCompletedViewers] = useState<ViewerRow[]>([]);
+  const [claimedViewers, setClaimedViewers] = useState<ViewerRow[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
     totalUsers: 0,
@@ -124,45 +126,55 @@ const AdminDashboard: React.FC = () => {
     };
   }, []);
 
+  const aggregateViewers = (rows: any[]): ViewerRow[] => {
+    const map = new Map<string, ViewerRow>();
+    rows.forEach((row: any) => {
+      const existing = map.get(row.viewer_id);
+      if (existing) {
+        existing.ads_watched += 1;
+        existing.points_earned += row.points_earned || 0;
+        if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
+      } else {
+        map.set(row.viewer_id, {
+          viewer_id: row.viewer_id,
+          ads_watched: 1,
+          points_earned: row.points_earned || 0,
+          last_watched: row.watched_at,
+        });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) =>
+      b.last_watched.localeCompare(a.last_watched)
+    );
+  };
+
   const fetchViewers = async () => {
     try {
       const { data, error } = await supabase
         .from('ad_views')
-        .select('viewer_id, points_earned, watched_at')
+        .select('viewer_id, points_earned, watched_at, earned')
         .order('watched_at', { ascending: false });
 
       if (error) throw error;
 
-      const map = new Map<string, ViewerRow>();
-      (data || []).forEach((row: any) => {
-        const existing = map.get(row.viewer_id);
-        if (existing) {
-          existing.ads_watched += 1;
-          existing.points_earned += row.points_earned || 0;
-          if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
-        } else {
-          map.set(row.viewer_id, {
-            viewer_id: row.viewer_id,
-            ads_watched: 1,
-            points_earned: row.points_earned || 0,
-            last_watched: row.watched_at,
-          });
-        }
-      });
+      const all = data || [];
+      const completedRows = all.filter((r: any) => !r.earned);
+      const claimedRows = all.filter((r: any) => r.earned);
 
-      const rows = Array.from(map.values()).sort((a, b) =>
-        b.last_watched.localeCompare(a.last_watched)
-      );
-      setViewers(rows);
+      const completed = aggregateViewers(completedRows);
+      const claimed = aggregateViewers(claimedRows);
+      setCompletedViewers(completed);
+      setClaimedViewers(claimed);
 
-      const totalViews = (data || []).length;
-      const totalPoints = (data || []).reduce(
+      const totalViews = completedRows.length;
+      const totalPoints = claimedRows.reduce(
         (s: number, r: any) => s + (r.points_earned || 0),
         0
       );
+      const uniqueViewers = new Set(all.map((r: any) => r.viewer_id)).size;
       setStats(prev => ({
         ...prev,
-        totalUsers: rows.length,
+        totalUsers: uniqueViewers,
         totalViews,
         totalPointsDistributed: totalPoints,
       }));
@@ -816,40 +828,84 @@ const AdminDashboard: React.FC = () => {
                 Ad Viewers
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                People who have watched advertisements
+                Track who completed videos vs who claimed rewards
               </p>
             </CardHeader>
             <CardContent>
-              {viewers.length === 0 ? (
-                <div className="text-center py-8 text-sm text-muted-foreground">
-                  No viewers yet. Once someone watches an ad they'll appear here.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b text-left text-muted-foreground">
-                        <th className="py-2 pr-4">Viewer</th>
-                        <th className="py-2 pr-4">Ads Watched</th>
-                        <th className="py-2 pr-4">Points Earned</th>
-                        <th className="py-2 pr-4">Last Watched</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {viewers.map((v) => (
-                        <tr key={v.viewer_id} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
-                          <td className="py-2 pr-4">{v.ads_watched}</td>
-                          <td className="py-2 pr-4">{v.points_earned}</td>
-                          <td className="py-2 pr-4">
-                            {new Date(v.last_watched).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              <Tabs defaultValue="completed" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-md">
+                  <TabsTrigger value="completed">
+                    Completed Views ({completedViewers.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="claimed">
+                    Claimed Rewards ({claimedViewers.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="completed" className="mt-4">
+                  {completedViewers.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-muted-foreground">
+                      No completed views yet. Once someone finishes watching an ad they'll appear here.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-left text-muted-foreground">
+                            <th className="py-2 pr-4">Viewer</th>
+                            <th className="py-2 pr-4">Videos Completed</th>
+                            <th className="py-2 pr-4">Last Watched</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {completedViewers.map((v) => (
+                            <tr key={v.viewer_id} className="border-b last:border-0">
+                              <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">
+                                {new Date(v.last_watched).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="claimed" className="mt-4">
+                  {claimedViewers.length === 0 ? (
+                    <div className="text-center py-8 text-sm text-muted-foreground">
+                      No claimed rewards yet. Viewers who pass the quiz will appear here.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-left text-muted-foreground">
+                            <th className="py-2 pr-4">Viewer</th>
+                            <th className="py-2 pr-4">Rewards Claimed</th>
+                            <th className="py-2 pr-4">Points Earned</th>
+                            <th className="py-2 pr-4">Last Claimed</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {claimedViewers.map((v) => (
+                            <tr key={v.viewer_id} className="border-b last:border-0">
+                              <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
+                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">{v.points_earned}</td>
+                              <td className="py-2 pr-4">
+                                {new Date(v.last_watched).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </motion.div>

@@ -28,9 +28,11 @@ interface Ad {
 interface VideoPlayerProps {
   ad: Ad;
   onAdComplete: (earned: boolean) => void;
+  onVideoEnded?: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnded }) => {
+  const hasNotifiedEndRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -144,7 +146,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete }) => {
   const handleVideoEnd = () => {
     setVideoCompleted(true);
     setIsPlaying(false);
-    
+
+    if (!hasNotifiedEndRef.current) {
+      hasNotifiedEndRef.current = true;
+      onVideoEnded?.();
+    }
+
     // If there are questions, show quiz
     if (ad.questions && ad.questions.length > 0) {
       setShowQuiz(true);
