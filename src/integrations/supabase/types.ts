@@ -17,6 +17,7 @@ export type Database = {
       ad_views: {
         Row: {
           ad_id: string
+          earned: boolean
           id: string
           points_earned: number
           viewer_id: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           ad_id: string
+          earned?: boolean
           id?: string
           points_earned?: number
           viewer_id: string
@@ -31,6 +33,7 @@ export type Database = {
         }
         Update: {
           ad_id?: string
+          earned?: boolean
           id?: string
           points_earned?: number
           viewer_id?: string
