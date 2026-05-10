@@ -64,7 +64,8 @@ interface ViewerRow {
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
-  const [viewers, setViewers] = useState<ViewerRow[]>([]);
+  const [completedViewers, setCompletedViewers] = useState<ViewerRow[]>([]);
+  const [claimedViewers, setClaimedViewers] = useState<ViewerRow[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
     totalUsers: 0,
@@ -124,45 +125,55 @@ const AdminDashboard: React.FC = () => {
     };
   }, []);
 
+  const aggregateViewers = (rows: any[]): ViewerRow[] => {
+    const map = new Map<string, ViewerRow>();
+    rows.forEach((row: any) => {
+      const existing = map.get(row.viewer_id);
+      if (existing) {
+        existing.ads_watched += 1;
+        existing.points_earned += row.points_earned || 0;
+        if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
+      } else {
+        map.set(row.viewer_id, {
+          viewer_id: row.viewer_id,
+          ads_watched: 1,
+          points_earned: row.points_earned || 0,
+          last_watched: row.watched_at,
+        });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) =>
+      b.last_watched.localeCompare(a.last_watched)
+    );
+  };
+
   const fetchViewers = async () => {
     try {
       const { data, error } = await supabase
         .from('ad_views')
-        .select('viewer_id, points_earned, watched_at')
+        .select('viewer_id, points_earned, watched_at, earned')
         .order('watched_at', { ascending: false });
 
       if (error) throw error;
 
-      const map = new Map<string, ViewerRow>();
-      (data || []).forEach((row: any) => {
-        const existing = map.get(row.viewer_id);
-        if (existing) {
-          existing.ads_watched += 1;
-          existing.points_earned += row.points_earned || 0;
-          if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
-        } else {
-          map.set(row.viewer_id, {
-            viewer_id: row.viewer_id,
-            ads_watched: 1,
-            points_earned: row.points_earned || 0,
-            last_watched: row.watched_at,
-          });
-        }
-      });
+      const all = data || [];
+      const completedRows = all.filter((r: any) => !r.earned);
+      const claimedRows = all.filter((r: any) => r.earned);
 
-      const rows = Array.from(map.values()).sort((a, b) =>
-        b.last_watched.localeCompare(a.last_watched)
-      );
-      setViewers(rows);
+      const completed = aggregateViewers(completedRows);
+      const claimed = aggregateViewers(claimedRows);
+      setCompletedViewers(completed);
+      setClaimedViewers(claimed);
 
-      const totalViews = (data || []).length;
-      const totalPoints = (data || []).reduce(
+      const totalViews = completedRows.length;
+      const totalPoints = claimedRows.reduce(
         (s: number, r: any) => s + (r.points_earned || 0),
         0
       );
+      const uniqueViewers = new Set(all.map((r: any) => r.viewer_id)).size;
       setStats(prev => ({
         ...prev,
-        totalUsers: rows.length,
+        totalUsers: uniqueViewers,
         totalViews,
         totalPointsDistributed: totalPoints,
       }));
