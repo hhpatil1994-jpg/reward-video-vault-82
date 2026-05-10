@@ -105,6 +105,26 @@ const UserDashboard: React.FC = () => {
     return viewerId;
   };
 
+  const recordView = async (earned: boolean, points: number) => {
+    if (!selectedAd) return;
+    try {
+      const { error } = await supabase.from('ad_views').insert({
+        viewer_id: getViewerId(),
+        ad_id: selectedAd.id,
+        points_earned: points,
+        earned,
+      });
+      if (error && error.code !== '23505') throw error;
+    } catch (err) {
+      console.warn('Could not record ad view', err);
+    }
+  };
+
+  const handleVideoEnded = async () => {
+    // Record completion (no reward yet)
+    await recordView(false, 0);
+  };
+
   const handleAdComplete = async (earned: boolean) => {
     if (selectedAd && earned) {
       const newStats = {
@@ -116,20 +136,7 @@ const UserDashboard: React.FC = () => {
       setStats(newStats);
       localStorage.setItem('userStats', JSON.stringify(newStats));
 
-      // Record the view in the database (ignore duplicates)
-      try {
-        const { error } = await supabase.from('ad_views').insert({
-          viewer_id: getViewerId(),
-          ad_id: selectedAd.id,
-          points_earned: selectedAd.reward_points,
-        });
-
-        if (error && error.code !== '23505') {
-          throw error;
-        }
-      } catch (err) {
-        console.warn('Could not record ad view', err);
-      }
+      await recordView(true, selectedAd.reward_points);
 
       toast({
         title: "Rewards Earned!",
@@ -165,7 +172,7 @@ const UserDashboard: React.FC = () => {
               ← Back to Dashboard
             </Button>
           </div>
-          <VideoPlayer ad={selectedAd} onAdComplete={handleAdComplete} />
+          <VideoPlayer ad={selectedAd} onAdComplete={handleAdComplete} onVideoEnded={handleVideoEnded} />
         </div>
       </div>
     );
