@@ -100,6 +100,22 @@ const AdminDashboard: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Server-side admin verification: redirect if not confirmed admin
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth', { replace: true });
+        return;
+      }
+      const { data: isAdmin, error } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin',
+      });
+      if (error || !isAdmin) {
+        navigate('/', { replace: true });
+      }
+    })();
+
     fetchAds();
     fetchViewers();
 
