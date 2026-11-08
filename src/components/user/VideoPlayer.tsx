@@ -400,11 +400,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
             animate={{ opacity: 1, y: 0 }}
             className="bg-green-100 border border-green-300 rounded-lg p-4 text-center"
           >
-            <div className="flex items-center justify-center gap-2 text-green-700">
+            <div className="flex flex-col items-center justify-center gap-2 text-green-700">
               <Coins className="h-6 w-6" />
-              <span className="font-semibold text-lg">
-                Message Verified · Reward Earned: {ad.reward_points} Points
-              </span>
+              <span className="font-semibold text-lg">Message Verified</span>
+              <span className="font-semibold text-lg">Reward Earned: {ad.reward_points} Points</span>
             </div>
           </motion.div>
         )}

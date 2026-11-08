@@ -73,10 +73,12 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             {score} / {questions.length}
           </div>
           <p className="text-muted-foreground">
-            {passed 
-              ? `Message Verified\nReward Earned: ${rewardPoints} Points`
-              : 'You need at least 60% to earn rewards. Try the understanding check again!'
-            }
+            {passed ? (
+              <span className="flex flex-col">
+                <span>Message Verified</span>
+                <span>Reward Earned: {rewardPoints} Points</span>
+              </span>
+            ) : 'You need at least 60% to earn rewards. Try the understanding check again!'}
           </p>
           <Button onClick={handleFinish} className="w-full">
             {passed ? 'Claim Rewards' : 'Try Again'}
