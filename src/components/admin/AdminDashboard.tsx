@@ -716,9 +716,9 @@ const AdminDashboard: React.FC = () => {
                   <div className="space-y-4 border-t pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base">Quiz Questions (Optional)</Label>
+                        <Label className="text-base">Verification Questions (Optional)</Label>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Add questions users must answer after watching the ad
+                          Add verification questions users must answer after watching the ad
                         </p>
                       </div>
                       <Button
@@ -892,7 +892,7 @@ const AdminDashboard: React.FC = () => {
                 <TabsContent value="claimed" className="mt-4">
                   {claimedViewers.length === 0 ? (
                     <div className="text-center py-8 text-sm text-muted-foreground">
-                      No claimed rewards yet. Viewers who pass the quiz will appear here.
+                      No claimed rewards yet. Viewers who pass the understanding check will appear here.
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
@@ -980,7 +980,7 @@ const AdminDashboard: React.FC = () => {
                                   <>
                                     <span>•</span>
                                     <span className="text-blue-600">
-                                      📝 {ad.questions.length} quiz question{ad.questions.length !== 1 ? 's' : ''}
+                                      📝 {ad.questions.length} verification question{ad.questions.length !== 1 ? 's' : ''}
                                     </span>
                                   </>
                                 )}
@@ -1086,12 +1086,12 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <Label className="flex items-center gap-2 text-lg font-semibold">
-                          📝 Quiz Questions
+                          📝 Verification Questions
                         </Label>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {editQuestions.length > 0
                             ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click fields below to edit`
-                            : 'Add questions users must answer after watching the ad'}
+                            : 'Add verification questions users must answer after watching the ad'}
                         </p>
                       </div>
                       <Button
@@ -1180,7 +1180,7 @@ const AdminDashboard: React.FC = () => {
                     {editQuestions.length === 0 && (
                       <div className="py-8 text-center text-muted-foreground">
                         <p className="text-sm font-medium">No questions added yet</p>
-                        <p className="mt-1 text-xs">Click "Add Question" button above to create quiz questions</p>
+                        <p className="mt-1 text-xs">Click "Add Question" button above to create verification questions</p>
                       </div>
                     )}
                   </div>

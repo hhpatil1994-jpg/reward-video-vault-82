@@ -177,7 +177,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
     } else {
       toast({
         title: "Better luck next time!",
-        description: "You need to pass the quiz to earn rewards.",
+        description: "You need to pass the understanding check to earn rewards.",
         variant: "destructive"
       });
     }
@@ -313,7 +313,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
                   onClick={() => handleVideoEnd()}
                 >
-                  {ad.questions && ad.questions.length > 0 ? 'Start Quiz & Earn Rewards' : 'Claim Reward'}
+                  {ad.questions && ad.questions.length > 0 ? 'Start Understanding Check & Earn Rewards' : 'Claim Reward'}
                 </Button>
               )}
             </div>
@@ -387,7 +387,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
           <div className="bg-blue-100 border border-blue-300 rounded-lg p-4 text-center">
             <p className="text-blue-700">
               {ad.questions && ad.questions.length > 0 
-                ? "Video completed! Get ready for the quiz to earn your rewards."
+                ? "Video completed! Get ready for the understanding check to earn your rewards."
                 : "Video completed! Processing your rewards..."
               }
             </p>

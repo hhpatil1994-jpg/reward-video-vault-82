@@ -293,7 +293,7 @@ const UserDashboard: React.FC = () => {
                 Available Advertisements
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Watch ads and complete quizzes to earn reward points
+                Watch ads and complete understanding checks to earn reward points
               </p>
             </CardHeader>
             <CardContent>
@@ -334,7 +334,7 @@ const UserDashboard: React.FC = () => {
                           
                           {ad.questions && ad.questions.length > 0 && (
                             <p className="text-xs text-blue-600 mb-2">
-                              📝 Quiz required ({ad.questions.length} questions)
+                              📝 Understanding check required ({ad.questions.length} questions)
                             </p>
                           )}
                           
