@@ -65,7 +65,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             ) : (
               <XCircle className="h-6 w-6 text-red-600" />
             )}
-            {passed ? 'Understanding check completed — understanding verified' : 'Understanding check not passed'}
+            {passed ? 'Quiz completed with understanding verified' : 'Understanding check not passed'}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
