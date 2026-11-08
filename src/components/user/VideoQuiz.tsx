@@ -65,7 +65,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             ) : (
               <XCircle className="h-6 w-6 text-red-600" />
             )}
-            {passed ? 'Quiz completed with understanding verified' : 'Understanding check not passed'}
+            {passed ? 'Understanding Verified!' : 'Understanding check not passed'}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
@@ -73,10 +73,12 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             {score} / {questions.length}
           </div>
           <p className="text-muted-foreground">
-            {passed 
-              ? `Congratulations! You earned ${rewardPoints} points!` 
-              : 'You need at least 60% to earn rewards. Try the understanding check again!'
-            }
+            {passed ? (
+              <span className="flex flex-col">
+                <span>Message Verified</span>
+                <span>Reward Earned: {rewardPoints} Points</span>
+              </span>
+            ) : 'You need at least 60% to earn rewards. Try the understanding check again!'}
           </p>
           <Button onClick={handleFinish} className="w-full">
             {passed ? 'Claim Rewards' : 'Try Again'}
