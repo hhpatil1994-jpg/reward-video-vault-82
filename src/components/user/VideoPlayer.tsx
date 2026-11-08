@@ -171,8 +171,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
     
     if (earned) {
       toast({
-        title: "Reward Earned! 🎉",
-        description: `You earned ${ad.reward_points} points!`,
+        title: "Message Verified",
+        description: `Reward Earned: ${ad.reward_points} Points`,
       });
     } else {
       toast({
@@ -403,7 +403,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
             <div className="flex items-center justify-center gap-2 text-green-700">
               <Coins className="h-6 w-6" />
               <span className="font-semibold text-lg">
-                Congratulations! You earned {ad.reward_points} points! 🎉
+                Message Verified · Reward Earned: {ad.reward_points} Points
               </span>
             </div>
           </motion.div>
