@@ -314,10 +314,10 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
           {/* Questions Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Quiz Questions</h3>
+              <h3 className="text-lg font-semibold">Verification Questions</h3>
               <Button type="button" onClick={addQuestion} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Question
+                Add Verification Question
               </Button>
             </div>
             
