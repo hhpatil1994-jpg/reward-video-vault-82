@@ -30,6 +30,7 @@ import {
   Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { calculateUnderstandingAnalytics, type AdViewEvent } from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -45,6 +46,7 @@ interface Ad {
   video_url: string;
   reward_points: number;
   questions?: Question[];
+  key_message: string;
   created_at: string;
 }
 
@@ -53,11 +55,15 @@ interface AdminStats {
   totalUsers: number;
   totalViews: number;
   totalPointsDistributed: number;
+  understandingRate: number;
 }
 
 interface ViewerRow {
+  id: string;
   viewer_id: string;
-  ads_watched: number;
+  ad_title: string;
+  key_message: string;
+  understanding_score: 0 | 100;
   points_earned: number;
   last_watched: string;
 }
@@ -71,14 +77,16 @@ const AdminDashboard: React.FC = () => {
     totalAds: 0,
     totalUsers: 0,
     totalViews: 0,
-    totalPointsDistributed: 0
+    totalPointsDistributed: 0,
+    understandingRate: 0,
   });
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadData, setUploadData] = useState({
     title: '',
     description: '',
+    keyMessage: '',
     videoUrl: '',
-    rewardPoints: 10
+    rewardPoints: 2
   });
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editQuestions, setEditQuestions] = useState<Question[]>([]);
@@ -92,6 +100,7 @@ const AdminDashboard: React.FC = () => {
   const [editData, setEditData] = useState({
     title: '',
     description: '',
+    keyMessage: '',
     videoUrl: '',
     rewardPoints: 2
   });
@@ -116,8 +125,7 @@ const AdminDashboard: React.FC = () => {
       }
     })();
 
-    fetchAds();
-    fetchViewers();
+    fetchAds().then(fetchViewers);
 
     const channel = supabase
       .channel('admin-dashboard-live')
@@ -132,7 +140,7 @@ const AdminDashboard: React.FC = () => {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'advertisements' },
         () => {
-          fetchAds();
+          fetchAds().then(fetchViewers);
         }
       )
       .subscribe();
@@ -142,57 +150,52 @@ const AdminDashboard: React.FC = () => {
     };
   }, []);
 
-  const aggregateViewers = (rows: any[]): ViewerRow[] => {
-    const map = new Map<string, ViewerRow>();
-    rows.forEach((row: any) => {
-      const existing = map.get(row.viewer_id);
-      if (existing) {
-        existing.ads_watched += 1;
-        existing.points_earned += row.points_earned || 0;
-        if (row.watched_at > existing.last_watched) existing.last_watched = row.watched_at;
-      } else {
-        map.set(row.viewer_id, {
-          viewer_id: row.viewer_id,
-          ads_watched: 1,
-          points_earned: row.points_earned || 0,
-          last_watched: row.watched_at,
-        });
-      }
-    });
-    return Array.from(map.values()).sort((a, b) =>
-      b.last_watched.localeCompare(a.last_watched)
-    );
-  };
-
   const fetchViewers = async () => {
     try {
-      const { data, error } = await supabase
+      const [{ data: viewData, error: viewsError }, { data: adData, error: adsError }] = await Promise.all([
+        supabase
         .from('ad_views')
-        .select('viewer_id, points_earned, watched_at, earned')
-        .order('watched_at', { ascending: false });
+        .select('id, viewer_id, ad_id, points_earned, watched_at, earned')
+        .order('watched_at', { ascending: false }),
+        supabase.from('advertisements').select('*'),
+      ]);
 
-      if (error) throw error;
+      if (viewsError) throw viewsError;
+      if (adsError) throw adsError;
 
-      const all = data || [];
-      const completedRows = all.filter((r: any) => !r.earned);
-      const claimedRows = all.filter((r: any) => r.earned);
+      const all = (viewData || []) as AdViewEvent[];
+      const adsWithKeyMessages = (adData || []).map((ad) => {
+        const adWithMessage = ad as typeof ad & { key_message?: string | null };
+        return {
+          id: ad.id,
+          title: ad.title,
+          key_message: adWithMessage.key_message || '',
+          questions: Array.isArray(ad.questions) ? ad.questions : [],
+        };
+      });
+      const analytics = calculateUnderstandingAnalytics(all, adsWithKeyMessages);
+      const adById = new Map(adsWithKeyMessages.map((ad) => [ad.id, ad]));
+      const toViewerRow = (view: (typeof analytics.completedViews)[number]): ViewerRow => ({
+        id: view.id,
+        viewer_id: view.viewer_id,
+        ad_title: adById.get(view.ad_id)?.title || 'Advertisement',
+        key_message: adById.get(view.ad_id)?.key_message || '—',
+        understanding_score: view.understanding_score,
+        points_earned: view.points_earned || 0,
+        last_watched: view.verified_at || view.watched_at,
+      });
+      const earnedRows = all.filter((row) => row.earned);
+      setCompletedViewers(analytics.completedViews.map(toViewerRow));
+      setClaimedViewers(analytics.verifiedViews.map(toViewerRow));
 
-      const completed = aggregateViewers(completedRows);
-      const claimed = aggregateViewers(claimedRows);
-      setCompletedViewers(completed);
-      setClaimedViewers(claimed);
-
-      const totalViews = completedRows.length;
-      const totalPoints = claimedRows.reduce(
-        (s: number, r: any) => s + (r.points_earned || 0),
-        0
-      );
-      const uniqueViewers = new Set(all.map((r: any) => r.viewer_id)).size;
+      const totalPoints = earnedRows.reduce((sum, row) => sum + (row.points_earned || 0), 0);
+      const uniqueViewers = new Set(all.map((row) => row.viewer_id)).size;
       setStats(prev => ({
         ...prev,
         totalUsers: uniqueViewers,
-        totalViews,
+        totalViews: analytics.completedViews.length,
         totalPointsDistributed: totalPoints,
+        understandingRate: analytics.understandingRate,
       }));
     } catch (error: any) {
       console.warn('Could not load viewers', error);
@@ -212,6 +215,7 @@ const AdminDashboard: React.FC = () => {
       const transformedAds = (data || []).map(ad => ({
         ...ad,
         description: ad.description || '',
+        key_message: (ad as typeof ad & { key_message?: string | null }).key_message || '',
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
           ? (ad.questions as any[]).map((q: any) => ({
@@ -271,10 +275,11 @@ const AdminDashboard: React.FC = () => {
         .insert({
           title: uploadData.title,
           description: uploadData.description,
+          key_message: uploadData.keyMessage,
           video_url: videoUrl,
           reward_points: uploadData.rewardPoints,
           questions: questions.length > 0 ? (questions as any) : []
-        })
+        } as any)
         .select()
         .single();
 
@@ -296,8 +301,9 @@ const AdminDashboard: React.FC = () => {
       setUploadData({
         title: '',
         description: '',
+        keyMessage: '',
         videoUrl: '',
-        rewardPoints: 10
+        rewardPoints: 2
       });
       setVideoFile(null);
       setQuestions([]);
@@ -318,8 +324,9 @@ const AdminDashboard: React.FC = () => {
     setEditData({
       title: ad.title,
       description: ad.description,
+      keyMessage: ad.key_message || '',
       videoUrl: ad.video_url,
-      rewardPoints: ad.reward_points
+      rewardPoints: 2
     });
     setEditQuestions(ad.questions || []);
   };
@@ -359,10 +366,11 @@ const AdminDashboard: React.FC = () => {
         .update({
           title: editData.title,
           description: editData.description,
+          key_message: editData.keyMessage,
           video_url: videoUrl,
-          reward_points: editData.rewardPoints,
+          reward_points: 2,
           questions: editQuestions.length > 0 ? (editQuestions as any) : []
-        })
+        } as any)
         .eq('id', editingAd.id);
 
       if (updateError) throw updateError;
@@ -373,8 +381,9 @@ const AdminDashboard: React.FC = () => {
               ...ad,
               title: editData.title,
               description: editData.description,
+              key_message: editData.keyMessage,
               video_url: videoUrl,
-              reward_points: editData.rewardPoints,
+              reward_points: 2,
               questions: editQuestions
             }
           : ad
