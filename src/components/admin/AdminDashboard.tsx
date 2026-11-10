@@ -219,6 +219,7 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
+        reward_points: 2,
         description: decodeAdvertisementDetails(ad.description).description,
         key_message: (ad as typeof ad & { key_message?: string | null }).key_message || decodeAdvertisementDetails(ad.description).keyMessage,
         video_url: ad.video_url || '',
@@ -230,7 +231,6 @@ const AdminDashboard: React.FC = () => {
           : []
       }));
 
-      setAds(transformedAds);
       setAds(transformedAds);
       setStats(prev => ({ ...prev, totalAds: transformedAds.length }));
     } catch (error: any) {
@@ -282,7 +282,7 @@ const AdminDashboard: React.FC = () => {
           title: uploadData.title,
           description: encodeAdvertisementDetails(uploadData.description, uploadData.keyMessage),
           video_url: videoUrl,
-          reward_points: uploadData.rewardPoints,
+          reward_points: 2,
           questions: questions.length > 0 ? (questions as any) : []
         })
         .select()
@@ -292,6 +292,9 @@ const AdminDashboard: React.FC = () => {
 
       const transformedAd = {
         ...newAd,
+        description: uploadData.description,
+        key_message: uploadData.keyMessage,
+        reward_points: 2,
         questions: (newAd.questions as any) || []
       };
 
@@ -913,7 +916,7 @@ const AdminDashboard: React.FC = () => {
                         <thead>
                           <tr className="border-b text-left text-muted-foreground">
                             <th className="py-2 pr-4">Viewer</th>
-                            <th className="py-2 pr-4">Videos Completed</th>
+            <th className="py-2 pr-4">Advertisement</th>
                             <th className="py-2 pr-4">Key Message</th>
                             <th className="py-2 pr-4">Understanding Score</th>
                             <th className="py-2 pr-4">Last Watched</th>
@@ -921,7 +924,7 @@ const AdminDashboard: React.FC = () => {
                         </thead>
                         <tbody>
                           {completedViewers.map((v) => (
-                            <tr key={v.viewer_id} className="border-b last:border-0">
+                            <tr key={v.id} className="border-b last:border-0">
                               <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
                               <td className="py-2 pr-4">{v.ad_title}</td>
                               <td className="py-2 pr-4">{v.key_message}</td>
