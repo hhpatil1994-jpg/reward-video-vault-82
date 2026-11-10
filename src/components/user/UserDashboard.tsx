@@ -13,6 +13,7 @@ import {
   Video
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { decodeAdvertisementDetails } from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -67,7 +68,8 @@ const UserDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        description: ad.description || '',
+        reward_points: 2,
+        description: decodeAdvertisementDetails(ad.description).description,
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
           ? (ad.questions as any[]).map((q: any) => ({
@@ -139,8 +141,8 @@ const UserDashboard: React.FC = () => {
       await recordView(true, selectedAd.reward_points);
 
       toast({
-        title: "Rewards Earned!",
-        description: `You've earned ${selectedAd.reward_points} points for completing this ad!`,
+        title: "Understanding Verified!",
+        description: `Key message successfully verified. Reward Earned: 2 Points`,
       });
     }
     setSelectedAd(null);
@@ -185,7 +187,7 @@ const UserDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">RewardAd Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome to the rewards platform</p>
+            <p className="text-sm text-muted-foreground">Verify key messages in advertisements</p>
           </div>
           <div className="flex gap-2">
             {user?.role === 'admin' ? (
@@ -293,7 +295,7 @@ const UserDashboard: React.FC = () => {
                 Available Advertisements
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Watch ads and complete understanding checks to earn reward points
+                Watch advertisements and verify the key message to earn 2 points
               </p>
             </CardHeader>
             <CardContent>
@@ -334,14 +336,14 @@ const UserDashboard: React.FC = () => {
                           
                           {ad.questions && ad.questions.length > 0 && (
                             <p className="text-xs text-blue-600 mb-2">
-                              📝 Understanding check required ({ad.questions.length} questions)
+                              📝 Understanding Check Required ({ad.questions.length} verification questions)
                             </p>
                           )}
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 text-green-600">
                               <Coins className="h-4 w-4" />
-                              <span className="font-medium">+{ad.reward_points} points</span>
+                              <span className="font-medium">+2 points</span>
                             </div>
                             
                             <Button

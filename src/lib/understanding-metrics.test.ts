@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'bun:test';
-import { calculateUnderstandingAnalytics, type AdViewEvent } from './understanding-metrics';
+import {
+  calculateUnderstandingAnalytics,
+  decodeAdvertisementDetails,
+  encodeAdvertisementDetails,
+  type AdViewEvent,
+} from './understanding-metrics';
 
 const events: AdViewEvent[] = [
   { id: 'view-1', viewer_id: 'viewer-a', ad_id: 'ad-1', points_earned: 0, watched_at: '2026-11-08T10:00:00Z', earned: false },
@@ -8,6 +13,14 @@ const events: AdViewEvent[] = [
 ];
 
 describe('understanding verification analytics', () => {
+  it('round-trips key messages without exposing storage metadata in the description', () => {
+    const encoded = encodeAdvertisementDetails('Product overview', 'Keep food fresh & safe');
+    const decoded = decodeAdvertisementDetails(encoded);
+
+    expect(decoded.description).toBe('Product overview');
+    expect(decoded.keyMessage).toBe('Keep food fresh & safe');
+  });
+
   it('calculates verified views divided by completed views and assigns 100% or 0%', () => {
     const result = calculateUnderstandingAnalytics(events, [{ id: 'ad-1', questions: [{ question: 'What is the message?' }] }]);
 

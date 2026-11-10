@@ -30,7 +30,12 @@ import {
   Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { calculateUnderstandingAnalytics, type AdViewEvent } from '@/lib/understanding-metrics';
+import {
+  calculateUnderstandingAnalytics,
+  decodeAdvertisementDetails,
+  encodeAdvertisementDetails,
+  type AdViewEvent,
+} from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -72,7 +77,7 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [ads, setAds] = useState<Ad[]>([]);
   const [completedViewers, setCompletedViewers] = useState<ViewerRow[]>([]);
-  const [claimedViewers, setClaimedViewers] = useState<ViewerRow[]>([]);
+  const [verifiedViewers, setVerifiedViewers] = useState<ViewerRow[]>([]);
   const [stats, setStats] = useState<AdminStats>({
     totalAds: 0,
     totalUsers: 0,
@@ -169,7 +174,7 @@ const AdminDashboard: React.FC = () => {
         return {
           id: ad.id,
           title: ad.title,
-          key_message: adWithMessage.key_message || '',
+          key_message: adWithMessage.key_message || decodeAdvertisementDetails(ad.description).keyMessage,
           questions: Array.isArray(ad.questions) ? ad.questions : [],
         };
       });
@@ -186,7 +191,7 @@ const AdminDashboard: React.FC = () => {
       });
       const earnedRows = all.filter((row) => row.earned);
       setCompletedViewers(analytics.completedViews.map(toViewerRow));
-      setClaimedViewers(analytics.verifiedViews.map(toViewerRow));
+      setVerifiedViewers(analytics.verifiedViews.map(toViewerRow));
 
       const totalPoints = earnedRows.reduce((sum, row) => sum + (row.points_earned || 0), 0);
       const uniqueViewers = new Set(all.map((row) => row.viewer_id)).size;
@@ -214,8 +219,9 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        description: ad.description || '',
-        key_message: (ad as typeof ad & { key_message?: string | null }).key_message || '',
+        reward_points: 2,
+        description: decodeAdvertisementDetails(ad.description).description,
+        key_message: (ad as typeof ad & { key_message?: string | null }).key_message || decodeAdvertisementDetails(ad.description).keyMessage,
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
           ? (ad.questions as any[]).map((q: any) => ({
@@ -274,12 +280,11 @@ const AdminDashboard: React.FC = () => {
         .from('advertisements')
         .insert({
           title: uploadData.title,
-          description: uploadData.description,
-          key_message: uploadData.keyMessage,
+          description: encodeAdvertisementDetails(uploadData.description, uploadData.keyMessage),
           video_url: videoUrl,
-          reward_points: uploadData.rewardPoints,
+          reward_points: 2,
           questions: questions.length > 0 ? (questions as any) : []
-        } as any)
+        })
         .select()
         .single();
 
@@ -287,6 +292,9 @@ const AdminDashboard: React.FC = () => {
 
       const transformedAd = {
         ...newAd,
+        description: uploadData.description,
+        key_message: uploadData.keyMessage,
+        reward_points: 2,
         questions: (newAd.questions as any) || []
       };
 
@@ -365,12 +373,11 @@ const AdminDashboard: React.FC = () => {
         .from('advertisements')
         .update({
           title: editData.title,
-          description: editData.description,
-          key_message: editData.keyMessage,
+          description: encodeAdvertisementDetails(editData.description, editData.keyMessage),
           video_url: videoUrl,
           reward_points: 2,
           questions: editQuestions.length > 0 ? (editQuestions as any) : []
-        } as any)
+        })
         .eq('id', editingAd.id);
 
       if (updateError) throw updateError;
@@ -539,7 +546,7 @@ const AdminDashboard: React.FC = () => {
 
       <div className="max-w-7xl mx-auto p-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -607,6 +614,23 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+          >
+            <Card className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Understanding Rate</CardTitle>
+                <TrendingUp className="h-4 w-4" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.understandingRate.toFixed(1)}%</div>
+                <p className="text-xs text-teal-50">Verified views ÷ completed views × 100</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Upload Section */}
@@ -625,7 +649,7 @@ const AdminDashboard: React.FC = () => {
                     Upload New Advertisement
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Add new video advertisements for users to watch and earn rewards
+                    Add video advertisements and define the key message to verify
                   </p>
                 </div>
                 <Button 
@@ -658,10 +682,12 @@ const AdminDashboard: React.FC = () => {
                       <Input
                         id="points"
                         type="number"
-                        min="1"
+                        min="2"
+                        max="2"
                         value={uploadData.rewardPoints}
                         onChange={(e) => setUploadData(prev => ({ ...prev, rewardPoints: parseInt(e.target.value) }))}
-                        placeholder="Points to award"
+                        placeholder="2 points per advertisement"
+                        readOnly
                         required
                       />
                     </div>
@@ -721,7 +747,19 @@ const AdminDashboard: React.FC = () => {
                     />
                   </div>
 
-                  {/* Quiz Questions Section */}
+                  <div className="space-y-2">
+                    <Label htmlFor="keyMessage">Key Message</Label>
+                    <Textarea
+                      id="keyMessage"
+                      value={uploadData.keyMessage}
+                      onChange={(e) => setUploadData(prev => ({ ...prev, keyMessage: e.target.value }))}
+                      placeholder="What is the one thing viewers should understand from this advertisement?"
+                      rows={2}
+                      required
+                    />
+                  </div>
+
+                  {/* Understanding check questions */}
                   <div className="space-y-4 border-t pt-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -853,7 +891,7 @@ const AdminDashboard: React.FC = () => {
                 Ad Viewers
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Track who completed videos vs who claimed rewards
+                        Track who completed videos and verified understanding of key messages
               </p>
             </CardHeader>
             <CardContent>
@@ -863,7 +901,7 @@ const AdminDashboard: React.FC = () => {
                     Completed Views ({completedViewers.length})
                   </TabsTrigger>
                   <TabsTrigger value="claimed">
-                    Claimed Rewards ({claimedViewers.length})
+                    Understanding Verified ({verifiedViewers.length})
                   </TabsTrigger>
                 </TabsList>
 
@@ -878,15 +916,19 @@ const AdminDashboard: React.FC = () => {
                         <thead>
                           <tr className="border-b text-left text-muted-foreground">
                             <th className="py-2 pr-4">Viewer</th>
-                            <th className="py-2 pr-4">Videos Completed</th>
+            <th className="py-2 pr-4">Advertisement</th>
+                            <th className="py-2 pr-4">Key Message</th>
+                            <th className="py-2 pr-4">Understanding Score</th>
                             <th className="py-2 pr-4">Last Watched</th>
                           </tr>
                         </thead>
                         <tbody>
                           {completedViewers.map((v) => (
-                            <tr key={v.viewer_id} className="border-b last:border-0">
+                            <tr key={v.id} className="border-b last:border-0">
                               <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
-                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">{v.ad_title}</td>
+                              <td className="py-2 pr-4">{v.key_message}</td>
+                              <td className="py-2 pr-4">{v.understanding_score}%</td>
                               <td className="py-2 pr-4">
                                 {new Date(v.last_watched).toLocaleString()}
                               </td>
@@ -899,9 +941,9 @@ const AdminDashboard: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="claimed" className="mt-4">
-                  {claimedViewers.length === 0 ? (
+                  {verifiedViewers.length === 0 ? (
                     <div className="text-center py-8 text-sm text-muted-foreground">
-                      No claimed rewards yet. Viewers who pass the understanding check will appear here.
+                      No understanding verifications yet. Successful key-message checks will appear here.
                     </div>
                   ) : (
                     <div className="overflow-x-auto">
@@ -909,16 +951,20 @@ const AdminDashboard: React.FC = () => {
                         <thead>
                           <tr className="border-b text-left text-muted-foreground">
                             <th className="py-2 pr-4">Viewer</th>
-                            <th className="py-2 pr-4">Rewards Claimed</th>
-                            <th className="py-2 pr-4">Points Earned</th>
-                            <th className="py-2 pr-4">Last Claimed</th>
+                            <th className="py-2 pr-4">Advertisement</th>
+                            <th className="py-2 pr-4">Key Message</th>
+                            <th className="py-2 pr-4">Understanding Score</th>
+                            <th className="py-2 pr-4">Reward Earned</th>
+                            <th className="py-2 pr-4">Verified At</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {claimedViewers.map((v) => (
-                            <tr key={v.viewer_id} className="border-b last:border-0">
+                          {verifiedViewers.map((v) => (
+                            <tr key={v.id} className="border-b last:border-0">
                               <td className="py-2 pr-4 font-mono text-xs">{v.viewer_id}</td>
-                              <td className="py-2 pr-4">{v.ads_watched}</td>
+                              <td className="py-2 pr-4">{v.ad_title}</td>
+                              <td className="py-2 pr-4">{v.key_message}</td>
+                              <td className="py-2 pr-4">{v.understanding_score}%</td>
                               <td className="py-2 pr-4">{v.points_earned}</td>
                               <td className="py-2 pr-4">
                                 {new Date(v.last_watched).toLocaleString()}
@@ -976,6 +1022,11 @@ const AdminDashboard: React.FC = () => {
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <h3 className="font-semibold text-lg mb-2">{ad.title}</h3>
+                              {ad.key_message && (
+                                <p className="text-sm mb-2">
+                                  <span className="font-medium">Key Message:</span> {ad.key_message}
+                                </p>
+                              )}
                               {ad.description && (
                                 <p className="text-sm text-muted-foreground mb-2">
                                   {ad.description}
@@ -1068,15 +1119,7 @@ const AdminDashboard: React.FC = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="edit-points">Reward Points</Label>
-                      <Input
-                        id="edit-points"
-                        type="number"
-                        min="1"
-                        value={editData.rewardPoints}
-                        onChange={(e) => setEditData(prev => ({ ...prev, rewardPoints: parseInt(e.target.value) }))}
-                        placeholder="Points to award"
-                        required
-                      />
+                      <Input id="edit-points" value="2 points" readOnly />
                     </div>
                   </div>
 
@@ -1088,6 +1131,18 @@ const AdminDashboard: React.FC = () => {
                       onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
                       placeholder="Enter ad description (optional)"
                       rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-keyMessage">Key Message</Label>
+                    <Textarea
+                      id="edit-keyMessage"
+                      value={editData.keyMessage}
+                      onChange={(e) => setEditData(prev => ({ ...prev, keyMessage: e.target.value }))}
+                      placeholder="What is the one thing viewers should understand from this advertisement?"
+                      rows={2}
+                      required
                     />
                   </div>
 

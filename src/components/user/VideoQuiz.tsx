@@ -16,14 +16,14 @@ interface VideoQuizProps {
   adTitle: string;
   questions: Question[];
   rewardPoints: number;
-  onQuizComplete: (passed: boolean) => void;
+  onUnderstandingCheckComplete: (passed: boolean) => void;
 }
 
 const VideoQuiz: React.FC<VideoQuizProps> = ({ 
   adTitle, 
   questions, 
   rewardPoints, 
-  onQuizComplete 
+  onUnderstandingCheckComplete 
 }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
@@ -51,7 +51,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
 
   const handleFinish = () => {
     const passed = score >= Math.ceil(questions.length * 0.6); // 60% pass rate
-    onQuizComplete(passed);
+    onUnderstandingCheckComplete(passed);
   };
 
   if (showResults) {
@@ -75,13 +75,13 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
           <p className="text-muted-foreground">
             {passed ? (
               <span className="flex flex-col">
-                <span>Message Verified</span>
+                <span>Key message successfully verified.</span>
                 <span>Reward Earned: {rewardPoints} Points</span>
               </span>
             ) : 'You need at least 60% to earn rewards. Try the understanding check again!'}
           </p>
           <Button onClick={handleFinish} className="w-full">
-            {passed ? 'Claim Rewards' : 'Try Again'}
+            {passed ? 'Finish Verification' : 'Try Again'}
           </Button>
         </CardContent>
       </Card>
