@@ -21,6 +21,7 @@ interface Ad {
   description: string;
   video_url: string;
   reward_points: number;
+  key_message?: string;
   questions?: Question[];
   duration?: number;
 }
@@ -56,7 +57,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [videoCompleted, setVideoCompleted] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
+  const [showUnderstandingCheck, setShowUnderstandingCheck] = useState(false);
   const [hasEarnedReward, setHasEarnedReward] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const { toast } = useToast();
@@ -152,17 +153,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
       onVideoEnded?.();
     }
 
-    // If there are questions, show quiz
+    // Show the understanding check when verification questions are available.
     if (ad.questions && ad.questions.length > 0) {
-      setShowQuiz(true);
+      setShowUnderstandingCheck(true);
     } else {
-      // No quiz, give reward directly
+      // Ads without verification questions reward completion directly.
       handleRewardEarned(true);
     }
   };
 
-  const handleQuizComplete = (passed: boolean) => {
-    setShowQuiz(false);
+  const handleUnderstandingCheckComplete = (passed: boolean) => {
+    setShowUnderstandingCheck(false);
     handleRewardEarned(passed);
   };
 
@@ -171,7 +172,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
     
     if (earned) {
       toast({
-        title: "Message Verified",
+        title: "Understanding Verified!",
         description: `Reward Earned: ${ad.reward_points} Points`,
       });
     } else {
@@ -243,15 +244,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
     return sources;
   };
 
-  // Show quiz if video is completed and quiz is available
-  if (showQuiz && ad.questions) {
+  // Show the understanding check after video completion.
+  if (showUnderstandingCheck && ad.questions) {
     return (
       <div className="space-y-6">
         <VideoQuiz
           adTitle={ad.title}
           questions={ad.questions}
           rewardPoints={ad.reward_points}
-          onQuizComplete={handleQuizComplete}
+          onUnderstandingCheckComplete={handleUnderstandingCheckComplete}
         />
       </div>
     );
@@ -383,11 +384,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
           )}
         </div>
 
-        {videoCompleted && !showQuiz && !videoError && (
+        {videoCompleted && !showUnderstandingCheck && !videoError && (
           <div className="bg-blue-100 border border-blue-300 rounded-lg p-4 text-center">
             <p className="text-blue-700">
               {ad.questions && ad.questions.length > 0 
-                ? "Video completed! Get ready for the understanding check to earn your rewards."
+                ? "Video completed! Get ready to verify the key message."
                 : "Video completed! Processing your rewards..."
               }
             </p>
@@ -402,7 +403,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
           >
             <div className="flex flex-col items-center justify-center gap-2 text-green-700">
               <Coins className="h-6 w-6" />
-              <span className="font-semibold text-lg">Message Verified</span>
+              <span className="font-semibold text-lg">Understanding Verified!</span>
+              <span className="font-semibold text-lg">Key message successfully verified.</span>
               <span className="font-semibold text-lg">Reward Earned: {ad.reward_points} Points</span>
             </div>
           </motion.div>
