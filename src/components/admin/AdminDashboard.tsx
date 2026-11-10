@@ -30,7 +30,12 @@ import {
   Plus
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { calculateUnderstandingAnalytics, type AdViewEvent } from '@/lib/understanding-metrics';
+import {
+  calculateUnderstandingAnalytics,
+  decodeAdvertisementDetails,
+  encodeAdvertisementDetails,
+  type AdViewEvent,
+} from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -169,7 +174,7 @@ const AdminDashboard: React.FC = () => {
         return {
           id: ad.id,
           title: ad.title,
-          key_message: adWithMessage.key_message || '',
+          key_message: adWithMessage.key_message || decodeAdvertisementDetails(ad.description).keyMessage,
           questions: Array.isArray(ad.questions) ? ad.questions : [],
         };
       });
@@ -214,8 +219,8 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        description: ad.description || '',
-        key_message: (ad as typeof ad & { key_message?: string | null }).key_message || '',
+        description: decodeAdvertisementDetails(ad.description).description,
+        key_message: (ad as typeof ad & { key_message?: string | null }).key_message || decodeAdvertisementDetails(ad.description).keyMessage,
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
           ? (ad.questions as any[]).map((q: any) => ({
@@ -275,12 +280,11 @@ const AdminDashboard: React.FC = () => {
         .from('advertisements')
         .insert({
           title: uploadData.title,
-          description: uploadData.description,
-          key_message: uploadData.keyMessage,
+          description: encodeAdvertisementDetails(uploadData.description, uploadData.keyMessage),
           video_url: videoUrl,
           reward_points: uploadData.rewardPoints,
           questions: questions.length > 0 ? (questions as any) : []
-        } as any)
+        })
         .select()
         .single();
 
@@ -366,12 +370,11 @@ const AdminDashboard: React.FC = () => {
         .from('advertisements')
         .update({
           title: editData.title,
-          description: editData.description,
-          key_message: editData.keyMessage,
+          description: encodeAdvertisementDetails(editData.description, editData.keyMessage),
           video_url: videoUrl,
           reward_points: 2,
           questions: editQuestions.length > 0 ? (editQuestions as any) : []
-        } as any)
+        })
         .eq('id', editingAd.id);
 
       if (updateError) throw updateError;

@@ -23,6 +23,33 @@ export interface UnderstandingAnalytics {
   understandingRate: number;
 }
 
+const KEY_MESSAGE_MARKER = '\n<!--rewardad-key-message:';
+
+export function encodeAdvertisementDetails(description: string, keyMessage: string): string {
+  const markerIndex = description.lastIndexOf(KEY_MESSAGE_MARKER);
+  const cleanDescription = markerIndex >= 0 ? description.slice(0, markerIndex) : description;
+  return `${cleanDescription}${KEY_MESSAGE_MARKER}${encodeURIComponent(keyMessage)}-->`;
+}
+
+export function decodeAdvertisementDetails(description: string | null | undefined): {
+  description: string;
+  keyMessage: string;
+} {
+  const value = description || '';
+  const markerIndex = value.lastIndexOf(KEY_MESSAGE_MARKER);
+  if (markerIndex < 0) return { description: value, keyMessage: '' };
+
+  const encodedValue = value.slice(markerIndex + KEY_MESSAGE_MARKER.length).replace(/-->\s*$/, '');
+  try {
+    return {
+      description: value.slice(0, markerIndex),
+      keyMessage: decodeURIComponent(encodedValue),
+    };
+  } catch {
+    return { description: value, keyMessage: '' };
+  }
+}
+
 export function calculateUnderstandingAnalytics(
   events: AdViewEvent[],
   advertisements: AdUnderstandingDefinition[],

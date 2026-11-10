@@ -13,6 +13,7 @@ import {
   Video
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { decodeAdvertisementDetails } from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -68,7 +69,7 @@ const UserDashboard: React.FC = () => {
       const transformedAds = (data || []).map(ad => ({
         ...ad,
         reward_points: 2,
-        description: ad.description || '',
+        description: decodeAdvertisementDetails(ad.description).description,
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
           ? (ad.questions as any[]).map((q: any) => ({
