@@ -314,7 +314,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10"
                   onClick={() => handleVideoEnd()}
                 >
-                  {ad.questions && ad.questions.length > 0 ? 'Start Understanding Check & Earn Rewards' : 'Claim Reward'}
+                  {ad.questions && ad.questions.length > 0 ? 'Start Understanding Check' : 'Complete Ad'}
                 </Button>
               )}
             </div>

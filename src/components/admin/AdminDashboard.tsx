@@ -763,7 +763,7 @@ const AdminDashboard: React.FC = () => {
                   <div className="space-y-4 border-t pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base">Verification Questions (Optional)</Label>
+                        <Label className="text-base">Understanding Check Questions (Optional)</Label>
                         <p className="text-xs text-muted-foreground mt-1">
                           Add verification questions users must answer after watching the ad
                         </p>
@@ -787,7 +787,7 @@ const AdminDashboard: React.FC = () => {
                         }}
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        Add Question
+                        Add Verification Question
                       </Button>
                     </div>
 
@@ -795,7 +795,7 @@ const AdminDashboard: React.FC = () => {
                       <Card key={q.id} className="p-4 bg-muted/30">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm font-medium">Question {qIndex + 1}</Label>
+                            <Label className="text-sm font-medium">Verification Question {qIndex + 1}</Label>
                             <Button
                               type="button"
                               variant="ghost"
@@ -813,7 +813,7 @@ const AdminDashboard: React.FC = () => {
                               updated[qIndex].question = e.target.value;
                               setQuestions(updated);
                             }}
-                            placeholder="Enter your question"
+                            placeholder="Enter the verification question"
                             required={questions.length > 0}
                           />
 
@@ -916,7 +916,7 @@ const AdminDashboard: React.FC = () => {
                         <thead>
                           <tr className="border-b text-left text-muted-foreground">
                             <th className="py-2 pr-4">Viewer</th>
-            <th className="py-2 pr-4">Advertisement</th>
+                            <th className="py-2 pr-4">Advertisement</th>
                             <th className="py-2 pr-4">Key Message</th>
                             <th className="py-2 pr-4">Understanding Score</th>
                             <th className="py-2 pr-4">Last Watched</th>
@@ -1150,7 +1150,7 @@ const AdminDashboard: React.FC = () => {
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <Label className="flex items-center gap-2 text-lg font-semibold">
-                          📝 Verification Questions
+                          📝 Understanding Check Questions
                         </Label>
                         <p className="mt-1 text-sm text-muted-foreground">
                           {editQuestions.length > 0
@@ -1175,7 +1175,7 @@ const AdminDashboard: React.FC = () => {
                         }}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Question
+                        Add Verification Question
                       </Button>
                     </div>
 
@@ -1183,7 +1183,7 @@ const AdminDashboard: React.FC = () => {
                       <Card key={q.id} className="border-2 bg-background p-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between gap-3">
-                            <Label className="text-base font-semibold">Question {qIndex + 1}</Label>
+                            <Label className="text-base font-semibold">Verification Question {qIndex + 1}</Label>
                             <Button
                               type="button"
                               variant="destructive"
@@ -1202,7 +1202,7 @@ const AdminDashboard: React.FC = () => {
                               updated[qIndex].question = e.target.value;
                               setEditQuestions(updated);
                             }}
-                            placeholder="Enter your question"
+                            placeholder="Enter the verification question"
                             required={editQuestions.length > 0}
                           />
 
@@ -1243,8 +1243,8 @@ const AdminDashboard: React.FC = () => {
 
                     {editQuestions.length === 0 && (
                       <div className="py-8 text-center text-muted-foreground">
-                        <p className="text-sm font-medium">No questions added yet</p>
-                        <p className="mt-1 text-xs">Click "Add Question" button above to create verification questions</p>
+                        <p className="text-sm font-medium">No verification questions added yet</p>
+                        <p className="mt-1 text-xs">Add a verification question to measure understanding</p>
                       </div>
                     )}
                   </div>
