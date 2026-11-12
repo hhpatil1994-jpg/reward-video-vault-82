@@ -65,7 +65,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             ) : (
               <XCircle className="h-6 w-6 text-red-600" />
             )}
-            {passed ? 'Understanding Verified!' : 'Understanding check not passed'}
+            {passed ? 'Understanding Verified!' : 'Understanding Check Not Passed'}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
@@ -95,10 +95,10 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5" />
-          Understanding check: {adTitle}
+          Understanding Check: {adTitle}
         </CardTitle>
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Verification question {currentQuestion + 1} of {questions.length}</span>
+          <span>Verification Question {currentQuestion + 1} of {questions.length}</span>
           <span>{Math.round(((currentQuestion + 1) / questions.length) * 100)}% Complete</span>
         </div>
       </CardHeader>
@@ -140,7 +140,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
             onClick={handleNext}
             disabled={selectedAnswers[currentQuestion] === undefined}
           >
-            {currentQuestion === questions.length - 1 ? 'Finish Check' : 'Next Question'}
+            {currentQuestion === questions.length - 1 ? 'Finish Verification' : 'Next Question'}
           </Button>
         </div>
       </CardContent>

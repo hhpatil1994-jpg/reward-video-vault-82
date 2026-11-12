@@ -186,7 +186,7 @@ const UserDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">RewardAd Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">RewardAD Dashboard</h1>
             <p className="text-sm text-muted-foreground">Verify key messages in advertisements</p>
           </div>
           <div className="flex gap-2">
@@ -336,7 +336,7 @@ const UserDashboard: React.FC = () => {
                           
                           {ad.questions && ad.questions.length > 0 && (
                             <p className="text-xs text-blue-600 mb-2">
-                              📝 Understanding Check Required ({ad.questions.length} verification questions)
+                              📝 Understanding Check Required ({ad.questions.length} Verification Questions)
                             </p>
                           )}
                           
