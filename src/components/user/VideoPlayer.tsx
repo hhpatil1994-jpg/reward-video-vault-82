@@ -170,15 +170,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
   const handleRewardEarned = (earned: boolean) => {
     setHasEarnedReward(earned);
     
-    if (earned) {
+    if (earned && (ad.questions?.length ?? 0) > 0) {
       toast({
         title: "Understanding Verified!",
+        description: `Key message successfully verified. Reward Earned: ${ad.reward_points} Points`,
+      });
+    } else if (earned) {
+      toast({
+        title: "Advertisement Completed!",
         description: `Reward Earned: ${ad.reward_points} Points`,
       });
     } else {
       toast({
-        title: "Better luck next time!",
-        description: "You need to pass the understanding check to earn rewards.",
+        title: "Understanding Not Verified",
+        description: "The key message was not verified. No reward was earned.",
         variant: "destructive"
       });
     }
@@ -389,7 +394,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
             <p className="text-blue-700">
               {ad.questions && ad.questions.length > 0 
                 ? "Video completed! Get ready to verify the key message."
-                : "Video completed! Processing your rewards..."
+                : "Video completed! Processing your points..."
               }
             </p>
           </div>

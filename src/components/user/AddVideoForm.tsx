@@ -314,7 +314,7 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
           {/* Questions Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Verification Questions</h3>
+              <h3 className="text-lg font-semibold">Understanding Check Questions</h3>
               <Button type="button" onClick={addQuestion} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Verification Question
@@ -325,7 +325,7 @@ const AddVideoForm: React.FC<AddVideoFormProps> = ({ onVideoAdded, onCancel }) =
               <Card key={question.id} className="border-2 border-dashed">
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Question {questionIndex + 1}</h4>
+                    <h4 className="font-medium">Verification Question {questionIndex + 1}</h4>
                     {questions.length > 1 && (
                       <Button
                         type="button"

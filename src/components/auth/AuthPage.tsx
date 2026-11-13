@@ -27,7 +27,7 @@ const AuthPage: React.FC = () => {
           className="text-center mb-8"
         >
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            RewardAd
+            RewardAD
           </h1>
           <p className="text-muted-foreground">
             Admin Login

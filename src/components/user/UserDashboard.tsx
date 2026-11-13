@@ -13,7 +13,7 @@ import {
   Video
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { decodeAdvertisementDetails } from '@/lib/understanding-metrics';
+import { ADVERTISEMENT_REWARD_POINTS, decodeAdvertisementDetails } from '@/lib/understanding-metrics';
 
 interface Question {
   id: string;
@@ -68,7 +68,7 @@ const UserDashboard: React.FC = () => {
       // Transform data to match Ad interface
       const transformedAds = (data || []).map(ad => ({
         ...ad,
-        reward_points: 2,
+        reward_points: ADVERTISEMENT_REWARD_POINTS,
         description: decodeAdvertisementDetails(ad.description).description,
         video_url: ad.video_url || '',
         questions: Array.isArray(ad.questions) 
@@ -130,19 +130,22 @@ const UserDashboard: React.FC = () => {
   const handleAdComplete = async (earned: boolean) => {
     if (selectedAd && earned) {
       const newStats = {
-        totalPoints: stats.totalPoints + selectedAd.reward_points,
+        totalPoints: stats.totalPoints + ADVERTISEMENT_REWARD_POINTS,
         adsWatched: stats.adsWatched + 1,
-        totalEarnings: stats.totalEarnings + selectedAd.reward_points
+        totalEarnings: stats.totalEarnings + ADVERTISEMENT_REWARD_POINTS
       };
 
       setStats(newStats);
       localStorage.setItem('userStats', JSON.stringify(newStats));
 
-      await recordView(true, selectedAd.reward_points);
+      await recordView(true, ADVERTISEMENT_REWARD_POINTS);
 
+      const understandingWasChecked = (selectedAd.questions?.length ?? 0) > 0;
       toast({
-        title: "Understanding Verified!",
-        description: `Key message successfully verified. Reward Earned: 2 Points`,
+        title: understandingWasChecked ? "Understanding Verified!" : "Advertisement Completed!",
+        description: understandingWasChecked
+          ? `Key message successfully verified. Reward Earned: ${ADVERTISEMENT_REWARD_POINTS} Points`
+          : `Reward Earned: ${ADVERTISEMENT_REWARD_POINTS} Points`,
       });
     }
     setSelectedAd(null);
@@ -295,7 +298,7 @@ const UserDashboard: React.FC = () => {
                 Available Advertisements
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Watch advertisements and verify the key message to earn 2 points
+                Watch advertisements and verify the key message to earn {ADVERTISEMENT_REWARD_POINTS} points
               </p>
             </CardHeader>
             <CardContent>
@@ -343,7 +346,7 @@ const UserDashboard: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 text-green-600">
                               <Coins className="h-4 w-4" />
-                              <span className="font-medium">+2 points</span>
+                              <span className="font-medium">+{ADVERTISEMENT_REWARD_POINTS} points</span>
                             </div>
                             
                             <Button

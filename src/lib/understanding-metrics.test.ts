@@ -3,6 +3,7 @@ import {
   calculateUnderstandingAnalytics,
   decodeAdvertisementDetails,
   encodeAdvertisementDetails,
+  ADVERTISEMENT_REWARD_POINTS,
   type AdViewEvent,
 } from './understanding-metrics';
 
@@ -13,6 +14,10 @@ const events: AdViewEvent[] = [
 ];
 
 describe('understanding verification analytics', () => {
+  it('sets every advertisement reward to exactly 2 points', () => {
+    expect(ADVERTISEMENT_REWARD_POINTS).toBe(2);
+  });
+
   it('round-trips key messages without exposing storage metadata in the description', () => {
     const encoded = encodeAdvertisementDetails('Product overview', 'Keep food fresh & safe');
     const decoded = decodeAdvertisementDetails(encoded);
