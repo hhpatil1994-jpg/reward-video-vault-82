@@ -53,7 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleMode }) => {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
         <p className="text-sm text-muted-foreground text-center">
-          Sign in to your RewardAd account
+          Sign in to your RewardAD account
         </p>
       </CardHeader>
       <CardContent>

@@ -50,7 +50,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
       await signUp(email, password);
       toast({
         title: "Account created!",
-        description: "Welcome to RewardAd! Please check your email to verify your account.",
+        description: "Welcome to RewardAD! Please check your email to verify your account.",
       });
     } catch (error: any) {
       toast({
@@ -68,7 +68,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onToggleMode }) => {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
         <p className="text-sm text-muted-foreground text-center">
-          Join RewardAd to start earning rewards
+          Join RewardAD to help verify advertising understanding
         </p>
       </CardHeader>
       <CardContent>
