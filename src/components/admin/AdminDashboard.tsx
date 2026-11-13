@@ -627,7 +627,8 @@ const AdminDashboard: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.understandingRate.toFixed(1)}%</div>
-                <p className="text-xs text-teal-50">Verified views ÷ completed views × 100</p>
+                <p className="text-xs text-teal-50">Percentage of viewers who completed the Understanding Check.</p>
+                <p className="text-xs text-teal-50">Successful Verifications ÷ Completed Views × 100</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -900,7 +901,7 @@ const AdminDashboard: React.FC = () => {
                   <TabsTrigger value="completed">
                     Completed Views ({completedViewers.length})
                   </TabsTrigger>
-                  <TabsTrigger value="claimed">
+                  <TabsTrigger value="verified">
                     Understanding Verified ({verifiedViewers.length})
                   </TabsTrigger>
                 </TabsList>
@@ -940,7 +941,7 @@ const AdminDashboard: React.FC = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="claimed" className="mt-4">
+                <TabsContent value="verified" className="mt-4">
                   {verifiedViewers.length === 0 ? (
                     <div className="text-center py-8 text-sm text-muted-foreground">
                       No understanding verifications yet. Successful key-message checks will appear here.
@@ -1033,14 +1034,14 @@ const AdminDashboard: React.FC = () => {
                                 </p>
                               )}
                               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                <span>Reward: {ad.reward_points} points</span>
+                                <span>Reward: 2 points</span>
                                 <span>•</span>
                                 <span>Created: {new Date(ad.created_at).toLocaleDateString()}</span>
                                 {ad.questions && ad.questions.length > 0 && (
                                   <>
                                     <span>•</span>
                                     <span className="text-blue-600">
-                                      📝 {ad.questions.length} verification question{ad.questions.length !== 1 ? 's' : ''}
+                                      📝 {ad.questions.length} Verification Question{ad.questions.length !== 1 ? 's' : ''}
                                     </span>
                                   </>
                                 )}
