@@ -170,10 +170,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ ad, onAdComplete, onVideoEnde
   const handleRewardEarned = (earned: boolean) => {
     setHasEarnedReward(earned);
     
-    if (earned) {
+    if (earned && (ad.questions?.length ?? 0) > 0) {
       toast({
         title: "Understanding Verified!",
         description: `Key message successfully verified. Reward Earned: ${ad.reward_points} Points`,
+      });
+    } else if (earned) {
+      toast({
+        title: "Advertisement Completed!",
+        description: `Reward Earned: ${ad.reward_points} Points`,
       });
     } else {
       toast({

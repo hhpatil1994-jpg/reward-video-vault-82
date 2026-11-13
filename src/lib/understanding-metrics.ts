@@ -23,6 +23,8 @@ export interface UnderstandingAnalytics {
   understandingRate: number;
 }
 
+export const ADVERTISEMENT_REWARD_POINTS = 2;
+
 const KEY_MESSAGE_MARKER = '\n<!--rewardad-key-message:';
 
 export function encodeAdvertisementDetails(description: string, keyMessage: string): string {
