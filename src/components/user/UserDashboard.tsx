@@ -142,7 +142,7 @@ const UserDashboard: React.FC = () => {
 
       toast({
         title: "Understanding Verified!",
-        description: `Key message successfully verified. Reward Earned: 2 Points`,
+        description: "Key message successfully verified. Reward Earned: 2 Points",
       });
     }
     setSelectedAd(null);

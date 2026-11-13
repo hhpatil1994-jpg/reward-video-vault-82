@@ -766,7 +766,7 @@ const AdminDashboard: React.FC = () => {
                       <div>
                         <Label className="text-base">Understanding Check Questions (Optional)</Label>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Add verification questions users must answer after watching the ad
+                          Add questions to verify the key message after viewers watch the ad
                         </p>
                       </div>
                       <Button
@@ -1156,7 +1156,7 @@ const AdminDashboard: React.FC = () => {
                         <p className="mt-1 text-sm text-muted-foreground">
                           {editQuestions.length > 0
                             ? `${editQuestions.length} question${editQuestions.length !== 1 ? 's' : ''} - Click fields below to edit`
-                            : 'Add verification questions users must answer after watching the ad'}
+                            : 'Add questions to verify the key message after viewers watch the ad'}
                         </p>
                       </div>
                       <Button

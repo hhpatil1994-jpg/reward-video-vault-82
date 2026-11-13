@@ -78,7 +78,7 @@ const VideoQuiz: React.FC<VideoQuizProps> = ({
                 <span>Key message successfully verified.</span>
                 <span>Reward Earned: {rewardPoints} Points</span>
               </span>
-            ) : 'You need at least 60% to earn rewards. Try the understanding check again!'}
+            ) : 'The key message was not verified. Try the Understanding Check again.'}
           </p>
           <Button onClick={handleFinish} className="w-full">
             {passed ? 'Finish Verification' : 'Try Again'}
