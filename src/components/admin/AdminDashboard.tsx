@@ -283,7 +283,7 @@ const AdminDashboard: React.FC = () => {
           title: uploadData.title,
           description: encodeAdvertisementDetails(uploadData.description, uploadData.keyMessage),
           video_url: videoUrl,
-          reward_points: 2,
+          reward_points: ADVERTISEMENT_REWARD_POINTS,
           questions: questions.length > 0 ? (questions as any) : []
         })
         .select()
@@ -376,7 +376,7 @@ const AdminDashboard: React.FC = () => {
           title: editData.title,
           description: encodeAdvertisementDetails(editData.description, editData.keyMessage),
           video_url: videoUrl,
-          reward_points: 2,
+          reward_points: ADVERTISEMENT_REWARD_POINTS,
           questions: editQuestions.length > 0 ? (editQuestions as any) : []
         })
         .eq('id', editingAd.id);
@@ -391,7 +391,7 @@ const AdminDashboard: React.FC = () => {
               description: editData.description,
               key_message: editData.keyMessage,
               video_url: videoUrl,
-              reward_points: 2,
+              reward_points: ADVERTISEMENT_REWARD_POINTS,
               questions: editQuestions
             }
           : ad
