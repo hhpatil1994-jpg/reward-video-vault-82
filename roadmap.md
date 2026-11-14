@@ -1,0 +1,4 @@
+- [x] Update platform language, required key messages, and advertiser understanding analytics.
+- [x] Enforce the fixed 2-point reward and test verification calculations.
+- [x] Keep admin authorization checks server-side through the protected role-check function.
+- [ ] Add a dedicated key-message field; database migration access is unavailable, so key messages currently use reversible storage alongside the description.

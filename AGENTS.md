@@ -1,2 +1,3 @@
 - Derive advertiser understanding analytics from paired completion and successful-verification events; this keeps the score aligned with the existing event data without storing a second score source.
 - Keep key-message encoding reversible and backward-compatible until a dedicated backend field is available, so older advertisements remain readable.
+- Resolve admin privileges through the authenticated server-side role-check function and keep role assignments in the protected role table, so browser-controlled state cannot grant admin access.

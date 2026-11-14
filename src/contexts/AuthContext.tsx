@@ -31,17 +31,12 @@ export const useAuth = () => {
 
 async function fetchUserRole(userId: string, accessToken: string): Promise<'user' | 'admin'> {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_roles?user_id=eq.${userId}&role=eq.admin&select=role`,
-      {
-        headers: {
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
-    const data = await response.json();
-    return Array.isArray(data) && data.length > 0 ? 'admin' : 'user';
+    if (!accessToken) return 'user';
+    const { data, error } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin',
+    });
+    return !error && data === true ? 'admin' : 'user';
   } catch {
     return 'user';
   }

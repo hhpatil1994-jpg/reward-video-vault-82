@@ -194,7 +194,7 @@ const AdminDashboard: React.FC = () => {
       setCompletedViewers(analytics.completedViews.map(toViewerRow));
       setVerifiedViewers(analytics.verifiedViews.map(toViewerRow));
 
-      const totalPoints = earnedRows.reduce((sum, row) => sum + (row.points_earned || 0), 0);
+      const totalPoints = earnedRows.length * ADVERTISEMENT_REWARD_POINTS;
       const uniqueViewers = new Set(all.map((row) => row.viewer_id)).size;
       setStats(prev => ({
         ...prev,
