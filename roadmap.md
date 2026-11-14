@@ -1,0 +1,4 @@
+- [x] Update platform language, required key messages, and advertiser understanding analytics.
+- [x] Enforce the fixed 2-point reward and test verification calculations.
+- [x] Keep admin authorization checks server-side through the protected role system.
+- [ ] Apply authenticated read grants to the role table; migration access is unavailable.
