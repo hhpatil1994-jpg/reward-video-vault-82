@@ -89,11 +89,6 @@ export function calculateUnderstandingAnalytics(
     unmatchedCompletions.set(pairKey, unmatched);
 
     if (completionIndex === undefined) {
-      completedViews.push({
-        ...event,
-        understanding_score: 100,
-        verified_at: event.watched_at,
-      });
       return;
     }
 

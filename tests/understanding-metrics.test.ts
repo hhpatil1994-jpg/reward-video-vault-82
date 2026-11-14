@@ -47,4 +47,15 @@ describe('understanding verification analytics', () => {
     expect(result.completedViews[0]?.understanding_score).toBe(0);
     expect(result.understandingRate).toBe(0);
   });
+
+  it('does not count an unmatched verification reward as a completed view', () => {
+    const orphanReward: AdViewEvent[] = [
+      { id: 'reward-only', viewer_id: 'viewer-d', ad_id: 'ad-1', points_earned: 2, watched_at: '2026-11-08T12:00:00Z', earned: true },
+    ];
+    const result = calculateUnderstandingAnalytics(orphanReward, [{ id: 'ad-1', questions: [{ question: 'What is the key message?' }] }]);
+
+    expect(result.completedViews).toHaveLength(0);
+    expect(result.verifiedViews).toHaveLength(0);
+    expect(result.understandingRate).toBe(0);
+  });
 });
