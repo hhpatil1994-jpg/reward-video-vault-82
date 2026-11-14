@@ -5,7 +5,7 @@ import {
   encodeAdvertisementDetails,
   ADVERTISEMENT_REWARD_POINTS,
   type AdViewEvent,
-} from './understanding-metrics';
+} from '../src/lib/understanding-metrics';
 
 const events: AdViewEvent[] = [
   { id: 'view-1', viewer_id: 'viewer-a', ad_id: 'ad-1', points_earned: 0, watched_at: '2026-11-08T10:00:00Z', earned: false },
